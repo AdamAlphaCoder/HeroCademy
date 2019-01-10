@@ -1,20 +1,34 @@
 const router = require('express').Router()
 const passport = require('passport')
 
+const facebook = require('./facebook')
+
 const User = require('../../models/User')
 
 router.post('/login', (req, res) => {
   passport.authenticate('local', (err, user, info) => {
-    if (err) return res.json({ success: false, message: err.message })
+    if (err)
+      return res.status(400).json({ success: false, message: err.message })
 
-    // Hides user password salt
-    if (user) user.password = undefined
+    if (user) {
+      req.logIn(user, e => {
+        if (e)
+          return res.status(400).json({ success: false, message: e.message })
 
-    res.status(user ? 200 : 401).json({
-      success: !!user,
-      user: user ? user : undefined,
-      message: info ? info.message : undefined
-    })
+        // Hides user password salt
+        user.password = undefined
+
+        res.status(200).json({
+          success: true,
+          user
+        })
+      })
+    } else {
+      res.status(401).json({
+        success: false,
+        message: info ? info.message : undefined
+      })
+    }
   })(req, res)
 })
 
@@ -51,26 +65,6 @@ router.post('/logout', (req, res) => {
   res.json({ success: true })
 })
 
-router.get(
-  '/facebook',
-  passport.authenticate('facebook', {
-    authType: 'rerequest',
-    scope: ['email']
-  })
-)
-
-router.get('/facebook/callback', (req, res) => {
-  passport.authenticate('facebook', (err, user, info) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message })
-    }
-
-    res.status(user ? 200 : 401).json({
-      success: !!user,
-      user: user ? user : undefined,
-      message: info ? info.message : undefined
-    })
-  })(req, res)
-})
+router.use('/facebook', facebook)
 
 module.exports = router

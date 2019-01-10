@@ -6,13 +6,18 @@ const User = require('./models/User')
 // Declare Passport strategies
 module.exports = passport => {
   passport.serializeUser((user, done) => {
-    done(null, user.id)
+    done(null, user._id)
   })
 
-  passport.deserializeUser((id, done) => {
-    User.findById(id, (err, user) => {
-      done(err, user)
-    })
+  passport.deserializeUser((_id, done) => {
+    User.findById(_id)
+      .select('name email photo role')
+      .then(user => {
+        done(null, user)
+      })
+      .catch(err => {
+        done(err, false)
+      })
   })
 
   passport.use(
@@ -31,8 +36,6 @@ module.exports = passport => {
         ]
       },
       (accessToken, refreshToken, profile, done) => {
-        console.log('PROFILE IS')
-        console.log(profile)
         User.findOneAndUpdate(
           { facebookId: profile.id },
           {
@@ -53,7 +56,7 @@ module.exports = passport => {
           },
           { new: true, upsert: true }
         )
-          .select('name email photo password role -_id')
+          .select('name email photo password role')
           .then(user => done(null, user))
           .catch(err => done(err))
       }
@@ -63,7 +66,7 @@ module.exports = passport => {
   passport.use(
     new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
       User.findOne({ email })
-        .select('name email photo password role -_id')
+        .select('name email photo password role')
         .exec((err, user) => {
           if (err) return done(err)
           if (!user) return done(null, false, { message: "User doesn't exist" })
