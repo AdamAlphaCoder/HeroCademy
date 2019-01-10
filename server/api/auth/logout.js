@@ -1,6 +1,7 @@
 const router = require('express').Router()
 
-router.get('/', (req, res) => {
+router.post('/', (req, res) => {
+  req.logout()
   res.json({ success: true })
 })
 
