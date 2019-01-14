@@ -23,10 +23,7 @@ router.get('/callback', (req, res) => {
         // Hides user password salt
         user.password = undefined
 
-        res.status(200).json({
-          success: true,
-          user
-        })
+        res.redirect('/')
       })
     } else {
       res.status(401).json({

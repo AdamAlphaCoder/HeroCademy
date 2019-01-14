@@ -29,14 +29,15 @@ export const actions = {
       throw new Error('Wrong email or password')
     }
   },
-  async register({ commit }, { email, password }) {
+  async register({ commit }, { email, password, name }) {
     if (!email || !password) throw new Error('Email and password are required')
     try {
       const {
         data: { user }
       } = await this.$axios.post('/api/auth/register', {
         email,
-        password
+        password,
+        name
       })
       commit('SET_USER', user)
     } catch (error) {

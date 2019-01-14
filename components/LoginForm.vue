@@ -1,133 +1,91 @@
 <template>
-  <div class="wrapper">
-    <a @click.prevent="modalShown=true">
-      {{ $store.state.authUser ? $store.state.authUser.email : 'Sign in' }} ▾
-    </a>
-    <div
-      v-if="modalShown"
-      class="m">
-      <a @click.prevent="reset">Close</a>
-      <br><br>
-      <div v-if="$store.state.authUser">
-        <form v-if="mode.passwordRecovery">
-          <p
-            v-if="form.error"
-            class="error">{{ form.error }}</p>
-          <p>Current password<input
-            v-model="form.currentPassword"
-            type="password" ></p>
-          <p>New password<input
-            v-model="form.password"
-            type="password" ></p>
-          <p>New password (Again)<input
-            v-model="form.passwordAgain"
-            type="password" ></p>
-        </form>
-        <button @click.prevent="changePassword">Change password</button><br >
-        <button @click.prevent="logout">Logout</button>
-      </div>
-      <div v-else>
-        <form @submit.prevent="auth">
-          <p
-            v-if="form.error"
-            class="error">{{ form.error }}</p>
-          <p>Email: <input
-            v-model="form.email"
-            type="text"
-            name="email" ></p>
-          <p>Password: <input
-            v-model="form.password"
-            type="password"
-            name="password" ></p>
-          <p v-if="mode.register">
-            Password (Again):
-            <input
-              v-model="form.passwordAgain"
-              type="password"
-              name="passwordAgain" >
-          </p>
-          <button type="submit">
-            {{ mode.register ? 'Create account' : 'Sign in' }}
-          </button>
-        </form>
-        <a
-          class="form-switch"
-          @click.prevent="mode.register=!mode.register">
-          {{ mode.register ? 'Sign in' : 'Create account' }}
-        </a>
-      </div>
-    </div>
+  <div id="loginForm">
+    <h5 id="headline" class="mb-5">{{ register ? 'Create an account' : 'Sign into your account' }}</h5>
+    <form @submit.prevent="auth">
+      <p v-if="form.error" class="error">{{ form.error }}</p>
+      <input
+        v-if="register"
+        v-model="form.name"
+        class="form-control mb-3"
+        type="text"
+        name="name"
+        placeholder="Name"
+      >
+      <input
+        v-model="form.email"
+        class="form-control mb-3"
+        type="text"
+        name="email"
+        placeholder="Email"
+      >
+      <input
+        v-model="form.password"
+        class="form-control mb-3"
+        type="password"
+        name="password"
+        placeholder="Password"
+      >
+      <input
+        v-if="register"
+        v-model="form.passwordAgain"
+        class="form-control mb-3"
+        type="password"
+        name="passwordAgain"
+        placeholder="Confirm Password"
+      >
+      <button
+        class="btn btn-primary btn-block"
+        type="submit"
+      >{{ register ? 'Create account' : 'Sign in' }}</button>
+    </form>
+    <button class="btn btn-success btn-block mt-3" @click="facebookLogin">Login with Facebook</button>
+    <small class="d-block text-center mt-3">
+      {{ register ? "Already a member?" : "Don't have an account?" }}
+      <a
+        href="#"
+        class="text-decoration-none"
+        @click.prevent="register=!register"
+      >{{ register ? 'Login here' : 'Register here' }}</a>
+    </small>
   </div>
 </template>
 
 <script>
-const getDefaultData = () => ({
-  modalShown: false,
-  form: {
-    error: null,
-    email: '',
-    password: '',
-    passwordAgain: '',
-    currentPassword: '' // For change password form
-  },
-  mode: {
-    register: false,
-    passwordRecovery: false
-  }
-})
-
 export default {
-  data: getDefaultData,
+  data() {
+    return {
+      form: {
+        error: null,
+        name: '',
+        email: '',
+        password: '',
+        passwordAgain: ''
+      },
+      register: false,
+      loginFormStyle: {
+        width: '400px'
+      }
+    }
+  },
   methods: {
-    reset() {
-      const d = getDefaultData()
-      Object.keys(d).forEach(key => {
-        this.$data[key] = d[key]
-      })
-    },
     async auth() {
       try {
-        if (
-          this.mode.register &&
-          this.form.password !== this.form.passwordAgain
-        ) {
+        if (this.register && this.form.password !== this.form.passwordAgain) {
           throw Error('Passwords should match')
         }
-        const action = this.mode.register ? 'register' : 'login'
+        const action = this.register ? 'register' : 'login'
         await this.$store.dispatch(action, {
           email: this.form.email,
           password: this.form.password
         })
-        this.reset()
+        this.$router.push('/')
       } catch (e) {
         this.form.error = e.message
       }
     },
-    async logout() {
-      try {
-        await this.$store.dispatch('logout')
-        this.reset()
-      } catch (e) {
-        this.form.error = e.message
-      }
-    },
-    async changePassword() {
-      if (!this.mode.passwordRecovery) {
-        this.mode.passwordRecovery = true
-        return
-      }
-      try {
-        if (this.form.password !== this.form.passwordAgain) {
-          throw Error('Passwords should match')
-        }
-        await this.$store.dispatch('changePassword', {
-          currentPassword: this.form.currentPassword,
-          newPassword: this.form.password
-        })
-        this.reset()
-      } catch (e) {
-        this.form.error = e.message
-      }
+    facebookLogin() {
+      // FIXME: Change this before going to production
+      window.location.href = `http://localhost:3000/api/auth/facebook`
     }
   }
 }
@@ -137,8 +95,20 @@ export default {
 a {
   text-decoration: underline;
 }
-.wrapper {
+
+#headline {
+  font-family: Dosis, sans-serif;
+}
+
+#loginForm {
   position: relative;
+  background-color: white;
+  width: 100%;
+  padding: 2rem !important;
+  max-width: 400px;
+  box-shadow: 0 0 48px rgba(0, 0, 0, 0.06);
+  -webkit-box-shadow: 0 0 48px rgba(0, 0, 0, 0.06);
+  border-radius: 0.25rem !important;
 }
 .m {
   border: 1px solid #888;
