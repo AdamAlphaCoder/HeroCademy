@@ -11,6 +11,7 @@ import LoginForm from '~/components/LoginForm'
 import img from '~/assets/img/bg/4.jpg'
 
 export default {
+  layout: 'nonavbarfooter',
   components: {
     LoginForm
   },

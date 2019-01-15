@@ -50,8 +50,12 @@ export const actions = {
     }
   },
   async logout({ commit }) {
-    const { data: success } = await this.$axios.post('/api/auth/logout')
-    if (success) commit('SET_USER', null)
+    try {
+      const { data: success } = await this.$axios.post('/api/auth/logout')
+      if (success) commit('SET_USER', null)
+    } catch (error) {
+      throw new Error('An error occured while logging out')
+    }
   },
   async changePassword({ commit }, { currentPassword, newPassword }) {
     if (!currentPassword || !newPassword)
