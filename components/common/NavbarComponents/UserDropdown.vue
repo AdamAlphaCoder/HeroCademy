@@ -6,7 +6,7 @@
         <template slot="button-content">
           <img
             id="userDropdownImage"
-            :src="$store.state.authUser.photo ? $store.state.authUser.photo : profile"
+            :src="$store.state.authUser.image ? $store.state.authUser.image : profile"
             alt="profile"
           >
         </template>

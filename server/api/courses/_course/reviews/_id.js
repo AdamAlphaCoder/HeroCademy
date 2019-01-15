@@ -5,10 +5,10 @@ router.patch('/', (req, res) => {
   try {
     res.json({
       success: true,
-      message: `/courses/${req.params.course}/review/${req.params.id} PATCH`
+      message: `/courses/${req.params.course}/reviews/${req.params.id} PATCH`
     })
   } catch (err) {
-    res.json({
+    res.status(500).json({
       success: false,
       message: err.message
     })

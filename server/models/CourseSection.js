@@ -3,7 +3,7 @@ const URLSlugs = require('mongoose-url-slugs')
 
 const CourseSectionSchema = new Schema({
   name: { type: String, required: true },
-  assets: [{ type: Schema.Types.ObjectId }]
+  course: { type: Schema.Types.ObjectId, ref: 'Course' }
 })
 
 CourseSectionSchema.plugin(URLSlugs('name'))

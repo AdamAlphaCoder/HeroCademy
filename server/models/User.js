@@ -24,7 +24,7 @@ const UserSchema = new Schema({
     type: String,
     required: false
   },
-  photo: {
+  image: {
     type: String,
     required: false
   },

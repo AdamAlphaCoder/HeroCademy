@@ -1,33 +1,45 @@
 const router = require('express').Router({ mergeParams: true })
 
-// Gets a single course section asset
-router.get('/', (req, res) => {
-  try {
-    res.json({
-      success: true,
-      message: `/courses/${req.params.course}/${req.params.section}/${
-        req.params.asset
-      } GET`
-    })
-  } catch (err) {
-    res.json({
-      success: false,
-      message: err.message
-    })
-  }
-})
+const Course = require('../../../../models/Course')
+const CourseSection = require('../../../../models/CourseSection')
+const CourseSectionAsset = require('../../../../models/CourseSectionAsset')
 
-// Creates a single course section asset
-router.post('/', (req, res) => {
+// Gets a single course section asset
+router.get('/', async (req, res) => {
   try {
+    const course = await Course.findOne({
+      slug: req.params.course
+    }).lean()
+
+    if (!course) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
+    const courseSection = await CourseSection.findOne({
+      slug: req.params.section,
+      course: course._id
+    }).lean()
+
+    if (!courseSection) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
+    const courseSectionAsset = await CourseSectionAsset.findOne({
+      courseSection: courseSection._id
+    }).lean()
+
     res.json({
-      success: true,
-      message: `/courses/${req.params.course}/${req.params.section}/${
-        req.params.asset
-      } POST`
+      success: !!courseSectionAsset,
+      courseSectionAsset
     })
   } catch (err) {
-    res.json({
+    res.status(500).json({
       success: false,
       message: err.message
     })
@@ -35,16 +47,41 @@ router.post('/', (req, res) => {
 })
 
 // Deletes a single course section asset
-router.delete('/', (req, res) => {
+router.delete('/', async (req, res) => {
   try {
+    const course = await Course.findOne({
+      slug: req.params.course
+    }).lean()
+
+    if (!course) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
+    const courseSection = await CourseSection.findOne({
+      slug: req.params.section,
+      course: course._id
+    }).lean()
+
+    if (!courseSection) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
+    const courseSectionAsset = await CourseSectionAsset.findOneAndDelete({
+      courseSection: courseSection._id
+    }).lean()
+
     res.json({
-      success: true,
-      message: `/courses/${req.params.course}/${req.params.section}/${
-        req.params.asset
-      } DELETE`
+      success: !!courseSectionAsset,
+      courseSectionAsset
     })
   } catch (err) {
-    res.json({
+    res.status(500).json({
       success: false,
       message: err.message
     })

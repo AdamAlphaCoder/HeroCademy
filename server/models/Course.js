@@ -3,9 +3,13 @@ const URLSlugs = require('mongoose-url-slugs')
 
 const CourseSchema = new Schema({
   name: { type: String, required: true },
+  image: {
+    type: String,
+    required: false
+  },
   description: { type: String, required: true },
-  lecturer: { type: Schema.Types.ObjectId, required: true },
-  courseSections: [{ type: Schema.Types.ObjectId }]
+  date: { type: Date, default: new Date() },
+  lecturer: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 })
 
 CourseSchema.plugin(URLSlugs('name'))

@@ -1,17 +1,30 @@
 const router = require('express').Router({ mergeParams: true })
 
-const section = require('./_section')
-const review = require('./review')
+const _section = require('./_section')
+const addSection = require('./addSection')
+const reviews = require('./reviews')
+
+const Course = require('../../../models/Course')
+
+router.use('/:section', _section)
+router.use('/addSection', addSection)
+router.use('/reviews', reviews)
 
 // Gets a single course
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
+    const course = await Course.findOne({
+      slug: req.params.course
+    })
+      .populate('lecturer', 'role email name image')
+      .lean()
+
     res.json({
       success: true,
-      message: `/courses/${req.params.course} GET`
+      course
     })
   } catch (err) {
-    res.json({
+    res.status(500).json({
       success: false,
       message: err.message
     })
@@ -19,21 +32,54 @@ router.get('/', (req, res) => {
 })
 
 // Updates a single course
-router.patch('/', (req, res) => {
+router.patch('/', async (req, res) => {
   try {
+    const { body } = req
+    const keys = ['description', 'image']
+
+    const update = {}
+
+    keys.forEach(key => {
+      // eslint-disable-next-line
+      if (body[key]) update[key] = body[key]
+    })
+
+    const course = await Course.findOneAndUpdate(
+      {
+        slug: req.params.course
+      },
+      update,
+      { new: true }
+    ).lean()
+
     res.json({
       success: true,
-      message: `/courses/${req.params.course} PATCH`
+      course
     })
   } catch (err) {
-    res.json({
+    res.status(500).json({
       success: false,
       message: err.message
     })
   }
 })
 
-router.use('/:section', section)
-router.use('/review', review)
+router.delete('/', async (req, res) => {
+  try {
+    const course = await Course.findOneAndDelete({
+      slug: req.params.course
+    })
+
+    res.json({
+      success: !!course,
+      course
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    })
+  }
+})
 
 module.exports = router
