@@ -1,14 +1,9 @@
 const router = require('express').Router({ mergeParams: true })
 
-const _section = require('./_section')
-const addSection = require('./addSection')
+const sections = require('./sections')
 const reviews = require('./reviews')
 
 const Course = require('../../../models/Course')
-
-router.use('/:section', _section)
-router.use('/addSection', addSection)
-router.use('/reviews', reviews)
 
 // Gets a single course
 router.get('/', async (req, res) => {
@@ -33,6 +28,7 @@ router.get('/', async (req, res) => {
 
 // Updates a single course
 router.patch('/', async (req, res) => {
+  // TODO: Check if user is the lecturer before proceeding
   try {
     const { body } = req
     const keys = ['description', 'image']
@@ -53,7 +49,7 @@ router.patch('/', async (req, res) => {
     ).lean()
 
     res.json({
-      success: true,
+      success: !!course,
       course
     })
   } catch (err) {
@@ -65,6 +61,7 @@ router.patch('/', async (req, res) => {
 })
 
 router.delete('/', async (req, res) => {
+  // TODO: Check if user is the lecturer before proceeding
   try {
     const course = await Course.findOneAndDelete({
       slug: req.params.course
@@ -81,5 +78,8 @@ router.delete('/', async (req, res) => {
     })
   }
 })
+
+router.use('/reviews', reviews)
+router.use('/sections', sections)
 
 module.exports = router

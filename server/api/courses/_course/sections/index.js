@@ -1,14 +1,11 @@
 const router = require('express').Router({ mergeParams: true })
 
-const _asset = require('./_asset')
-const addAsset = require('./addAsset')
-
 const Course = require('../../../../models/Course')
 const CourseSection = require('../../../../models/CourseSection')
 
-router.use('/addAsset', addAsset)
+const _section = require('./_section')
 
-// Gets a single course section
+// Lists all sections in course
 router.get('/', async (req, res) => {
   try {
     const course = await Course.findOne({
@@ -17,19 +14,18 @@ router.get('/', async (req, res) => {
 
     if (!course) {
       return res.json({
-        success: true,
-        courseSection: null
+        success: false,
+        courseSections: []
       })
     }
 
-    const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+    const courseSections = await CourseSection.find({
       course: course._id
     }).lean()
 
-    res.json({
-      success: !!courseSection,
-      courseSection
+    return res.json({
+      success: !!courseSections.length,
+      courseSections
     })
   } catch (err) {
     res.status(500).json({
@@ -39,24 +35,29 @@ router.get('/', async (req, res) => {
   }
 })
 
-// Deletes a single course section
-router.delete('/', async (req, res) => {
+// Creates a single course section
+router.post('/', async (req, res) => {
   try {
+    // TODO: Use JOI to ensure all stuffs are filled before posting to MongoDb
+    const { name } = req.body
+
     const course = await Course.findOne({
       slug: req.params.course
     }).lean()
 
     if (!course) {
       return res.json({
-        success: true,
+        success: false,
         courseSection: null
       })
     }
 
-    const courseSection = await CourseSection.findOneAndDelete({
-      slug: req.params.section,
+    const courseSection = new CourseSection({
+      name,
       course: course._id
-    }).lean()
+    })
+
+    await courseSection.save()
 
     res.json({
       success: !!courseSection,
@@ -70,6 +71,6 @@ router.delete('/', async (req, res) => {
   }
 })
 
-router.use('/:asset', _asset)
+router.use('/:section', _section)
 
 module.exports = router

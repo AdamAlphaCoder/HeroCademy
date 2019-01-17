@@ -1,8 +1,8 @@
 const router = require('express').Router({ mergeParams: true })
 
-const Course = require('../../../../models/Course')
-const CourseSection = require('../../../../models/CourseSection')
-const CourseSectionAsset = require('../../../../models/CourseSectionAsset')
+const Course = require('../../../../../../models/Course')
+const CourseSection = require('../../../../../../models/CourseSection')
+const CourseSectionAsset = require('../../../../../../models/CourseSectionAsset')
 
 // Gets a single course section asset
 router.get('/', async (req, res) => {
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     if (!course) {
       return res.json({
         success: false,
-        courseSectionAsset: null
+        courseSectionAssets: null
       })
     }
 
@@ -26,17 +26,17 @@ router.get('/', async (req, res) => {
     if (!courseSection) {
       return res.json({
         success: false,
-        courseSectionAsset: null
+        courseSectionAssets: null
       })
     }
 
-    const courseSectionAsset = await CourseSectionAsset.findOne({
+    const courseSectionAssets = await CourseSectionAsset.find({
       courseSection: courseSection._id
     }).lean()
 
     res.json({
-      success: !!courseSectionAsset,
-      courseSectionAsset
+      success: !!courseSectionAssets.length,
+      courseSectionAssets
     })
   } catch (err) {
     res.status(500).json({

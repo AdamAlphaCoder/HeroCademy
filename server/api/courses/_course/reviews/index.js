@@ -6,12 +6,39 @@ const Course = require('../../../../models/Course')
 const CourseReview = require('../../../../models/CourseReview')
 
 // Gets all reviews for course
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+  const perPage = 30
   try {
     // TODO: Check if user owns this course, and is not the owner
+
+    const page = Number(req.query.page) || 0
+    const course = await Course.findOne({
+      slug: req.params.course
+    }).lean()
+
+    if (!course) {
+      return res.json({
+        success: false,
+        courseReviews: []
+      })
+    }
+
+    const count = await CourseReview.count({}).lean()
+    let courseReviews = []
+
+    if (count > page * perPage) {
+      courseReviews = await CourseReview.find({
+        course: course._id
+      })
+        .sort({ date: -1 })
+        .skip(page * perPage)
+        .limit(perPage)
+        .lean()
+    }
+
     res.json({
-      success: true,
-      message: `/courses/${req.params.course}/reviews GET`
+      success: !!courseReviews.length,
+      courseReviews
     })
   } catch (err) {
     res.status(500).json({
@@ -22,12 +49,43 @@ router.get('/', (req, res) => {
 })
 
 // Creates review for course
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     // TODO: Check if user owns this course, and is not the owner
+    const { rating } = req.body
+    const { _id: reviewer } = req.user
+
+    const course = await Course.findOne({
+      slug: req.params.course
+    }).lean()
+
+    if (!course) {
+      return res.json({
+        success: false,
+        courseReview: null
+      })
+    }
+
+    let courseReviewExists = await CourseReview.count({ reviewer })
+
+    if (courseReviewExists) {
+      return res.status(409).json({
+        success: false,
+        message: 'You already have a review for this course'
+      })
+    }
+
+    const courseReview = new CourseReview({
+      course: course._id,
+      rating: rating,
+      reviewer
+    })
+
+    await courseReview.save()
+
     res.json({
-      success: true,
-      message: `/courses/${req.params.course}/reviews POST`
+      success: !!courseReview,
+      courseReview
     })
   } catch (err) {
     res.status(500).json({

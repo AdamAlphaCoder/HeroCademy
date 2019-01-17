@@ -63,6 +63,7 @@ router.post('/', checkLecturerStatus, async (req, res) => {
   }
 })
 
+// TODO: Add Ownership check to _course
 router.use('/:course', _course)
 
 module.exports = router
