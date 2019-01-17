@@ -25,7 +25,8 @@ router.get('/', async (req, res) => {
 
     res.json({
       success: true,
-      courses
+      courses,
+      count
     })
   } catch (err) {
     res.status(500).json({

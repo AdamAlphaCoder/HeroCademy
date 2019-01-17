@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
   try {
     const course = await Course.findOne({
       slug: req.params.course
-    })
+    }).lean()
 
     if (!course) {
       return res.json({
@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     }).lean()
 
     return res.json({
-      success: !!courseSectionAssets,
+      success: !!courseSectionAssets.length,
       courseSectionAssets
     })
   } catch (err) {

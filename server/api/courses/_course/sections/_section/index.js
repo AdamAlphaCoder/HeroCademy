@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 
     if (!course) {
       return res.json({
-        success: true,
+        success: false,
         courseSection: null
       })
     }
@@ -45,7 +45,7 @@ router.delete('/', async (req, res) => {
 
     if (!course) {
       return res.json({
-        success: true,
+        success: false,
         courseSection: null
       })
     }
@@ -54,6 +54,51 @@ router.delete('/', async (req, res) => {
       slug: req.params.section,
       course: course._id
     }).lean()
+
+    res.json({
+      success: !!courseSection,
+      courseSection
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    })
+  }
+})
+
+// Updates a single course section
+router.patch('/', async (req, res) => {
+  try {
+    const { body } = req
+    const keys = []
+
+    const update = {}
+
+    keys.forEach(key => {
+      // eslint-disable-next-line
+      if (body[key]) update[key] = body[key]
+    })
+
+    const course = await Course.findOne({
+      slug: req.params.course
+    }).lean()
+
+    if (!course) {
+      return res.json({
+        success: false,
+        courseSection: null
+      })
+    }
+
+    const courseSection = await CourseSection.findOneAndUpdate(
+      {
+        slug: req.params.section,
+        course: course._id
+      },
+      update,
+      { new: true }
+    ).lean()
 
     res.json({
       success: !!courseSection,

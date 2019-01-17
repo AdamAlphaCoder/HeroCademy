@@ -9,8 +9,6 @@ const CourseReview = require('../../../../models/CourseReview')
 router.get('/', async (req, res) => {
   const perPage = 30
   try {
-    // TODO: Check if user owns this course, and is not the owner
-
     const page = Number(req.query.page) || 0
     const course = await Course.findOne({
       slug: req.params.course
@@ -38,7 +36,8 @@ router.get('/', async (req, res) => {
 
     res.json({
       success: !!courseReviews.length,
-      courseReviews
+      courseReviews,
+      count
     })
   } catch (err) {
     res.status(500).json({
@@ -52,7 +51,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     // TODO: Check if user owns this course, and is not the owner
-    const { rating } = req.body
+    const { rating, comment } = req.body
     const { _id: reviewer } = req.user
 
     const course = await Course.findOne({
@@ -77,7 +76,8 @@ router.post('/', async (req, res) => {
 
     const courseReview = new CourseReview({
       course: course._id,
-      rating: rating,
+      comment,
+      rating,
       reviewer
     })
 
