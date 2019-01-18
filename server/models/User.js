@@ -1,9 +1,9 @@
-const mongoose = require('mongoose')
+const { model, Schema } = require('mongoose')
 const bcrypt = require('bcrypt')
 
-const userRoles = ['student', 'lecturer', 'admin']
+const USER = require('./constants/USER')
 
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -24,14 +24,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  photo: {
+  image: {
     type: String,
     required: false
   },
   role: {
     type: String,
-    enum: userRoles,
-    default: userRoles[0]
+    enum: USER.all,
+    default: USER.types.STUDENT
   }
 })
 
@@ -57,4 +57,4 @@ UserSchema.methods.comparePassword = function(candidatePassword, next) {
   })
 }
 
-module.exports = mongoose.model('User', UserSchema)
+module.exports = model('User', UserSchema)

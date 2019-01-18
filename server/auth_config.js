@@ -11,7 +11,7 @@ module.exports = passport => {
 
   passport.deserializeUser((_id, done) => {
     User.findById(_id)
-      .select('name email photo role')
+      .select('name email image role')
       .then(user => {
         done(null, user)
       })
@@ -44,19 +44,19 @@ module.exports = passport => {
                   facebookId: profile.id,
                   name: profile.displayName,
                   email: profile.emails[0].value,
-                  photo: ((profile.photos || [])[0] || {}).value,
+                  image: ((profile.photos || [])[0] || {}).value,
                   role: 'student'
                 }
               : {
                   facebookId: profile.id,
                   name: profile.displayName,
-                  photo: ((profile.photos || [])[0] || {}).value,
+                  image: ((profile.photos || [])[0] || {}).value,
                   role: 'student'
                 }
           },
           { new: true, upsert: true }
         )
-          .select('name email photo password role')
+          .select('name email image password role')
           .then(user => done(null, user))
           .catch(err => done(err))
       }
@@ -66,7 +66,7 @@ module.exports = passport => {
   passport.use(
     new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
       User.findOne({ email })
-        .select('name email photo password role')
+        .select('name email image password role')
         .exec((err, user) => {
           if (err) return done(err)
           if (!user) return done(null, false, { message: "User doesn't exist" })
