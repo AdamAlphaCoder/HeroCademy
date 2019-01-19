@@ -1,8 +1,9 @@
-export default ({ store, error }) => {
+export default ({ store, redirect }) => {
   if (!store.state.authUser) {
-    error({
-      message: 'You are not authenticated',
-      statusCode: 401
-    })
+    // error({
+    //   message: 'You are not authenticated',
+    //   statusCode: 401
+    // })
+    redirect('/auth')
   }
 }

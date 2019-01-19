@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline-block">
-    <b-nav-item v-if="!$store.state.authUser" to="/auth" exact>Login</b-nav-item>
+    <b-button v-if="!$store.state.authUser" to="/auth" variant="success" exact>Login</b-button>
     <b-button-group v-if="$store.state.authUser" size="sm" class="mr-3">
       <b-dropdown variant="link" class="profileDropdown" right no-caret>
         <template slot="button-content">
@@ -17,6 +17,10 @@
           </div>
         </b-dropdown-item>
         <b-dropdown-divider/>
+        <b-dropdown-item
+          v-if="($store.state.authUser.role === 'LECTURER') || ($store.state.authUser.role === 'ADMIN')"
+          to="/lecturer"
+        >Lecturer Panel</b-dropdown-item>
         <b-dropdown-item to="/my-messages">Messages</b-dropdown-item>
         <b-dropdown-item @click="logout">Logout</b-dropdown-item>
       </b-dropdown>
@@ -25,6 +29,7 @@
 </template>
 
 <script>
+// TODO: Change check role type to using constants file
 import profile from '~/assets/img/profile.jpg'
 
 export default {

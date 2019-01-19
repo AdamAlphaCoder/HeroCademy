@@ -1,13 +1,15 @@
 const router = require('express').Router()
 
-const _course = require('./_course')
-const checkLecturerStatus = require('../../middleware/checkLecturerStatus')
-
 const Course = require('../../models/Course')
+
+const upload = require('../../upload')
+const _course = require('./_course')
+
+const checkLecturerStatus = require('../../middleware/checkLecturerStatus')
 
 // List all courses
 router.get('/', async (req, res) => {
-  const perPage = 30
+  const perPage = 5
 
   try {
     const page = Number(req.query.page) || 0
@@ -26,7 +28,8 @@ router.get('/', async (req, res) => {
     res.json({
       success: true,
       courses,
-      count
+      count,
+      perPage
     })
   } catch (err) {
     res.status(500).json({
@@ -37,32 +40,40 @@ router.get('/', async (req, res) => {
 })
 
 // Create new course
-router.post('/', checkLecturerStatus, async (req, res) => {
-  try {
-    // TODO: Use JOI to ensure all stuffs are filled before posting to MongoDb
-    const { name, description, image } = req.body
-    const { _id: lecturer } = req.user
+router.post(
+  '/',
+  checkLecturerStatus,
+  upload.single('image'),
+  async (req, res) => {
+    try {
+      // TODO: Use JOI to ensure all stuffs are filled before posting to MongoDb
+      const { name, description } = req.body
+      const { _id: lecturer } = req.user
 
-    const course = new Course({
-      name,
-      description,
-      image,
-      lecturer
-    })
+      console.log('IMAGE IS')
+      console.log(req.file.location)
 
-    await course.save()
+      const course = new Course({
+        name,
+        description,
+        image: req.file.location,
+        lecturer
+      })
 
-    res.json({
-      success: true,
-      course
-    })
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    })
+      await course.save()
+
+      res.json({
+        success: !!course,
+        course
+      })
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: err.message
+      })
+    }
   }
-})
+)
 
 // TODO: Add Ownership check to _course
 router.use('/:course', _course)

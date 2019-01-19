@@ -6,6 +6,7 @@
 </template>
 
 <script>
+// TODO: Add message bar component
 import Navbar from '~/components/common/Navbar'
 
 export default {

@@ -2,6 +2,7 @@ const { Strategy: FacebookStrategy } = require('passport-facebook')
 const { Strategy: LocalStrategy } = require('passport-local')
 
 const User = require('./models/User')
+const USER = require('./models/constants/USER')
 
 // Declare Passport strategies
 module.exports = passport => {
@@ -45,13 +46,13 @@ module.exports = passport => {
                   name: profile.displayName,
                   email: profile.emails[0].value,
                   image: ((profile.photos || [])[0] || {}).value,
-                  role: 'student'
+                  role: USER.types.STUDENT
                 }
               : {
                   facebookId: profile.id,
                   name: profile.displayName,
                   image: ((profile.photos || [])[0] || {}).value,
-                  role: 'student'
+                  role: USER.types.STUDENT
                 }
           },
           { new: true, upsert: true }

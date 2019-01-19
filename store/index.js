@@ -1,10 +1,18 @@
 export const state = () => ({
-  authUser: null
+  authUser: null,
+  message: null,
+  messageVariant: null
 })
 
 export const mutations = {
   SET_USER: function(state, user) {
     state.authUser = user
+  },
+  SET_MESSAGE: function(state, message) {
+    state.message = message
+  },
+  SET_MESSAGEVARIANT: function(state, messageVariant) {
+    state.messageVariant = messageVariant
   }
 }
 
