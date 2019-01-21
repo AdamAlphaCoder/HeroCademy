@@ -13,7 +13,13 @@
         required
         placeholder="Enter description"
       />
-      <b-form-file v-model="image" class="mt-3" placeholder="Choose a image..." accept="image/*"/>
+      <b-form-file
+        v-model="image"
+        class="mt-3"
+        placeholder="Choose a image..."
+        accept="image/*"
+        required
+      />
       <b-button class="mt-3" variant="success" type="submit" block size="lg">Submit</b-button>
     </b-form>
   </div>
@@ -21,7 +27,7 @@
 
 <script>
 export default {
-  middleware: 'auth',
+  middleware: ['checkAuth', 'checkLecturerStatus'],
   data() {
     return {
       name: '',
@@ -39,12 +45,14 @@ export default {
         formData.append('image', this.image)
 
         const {
-          data: { success, course }
+          data: { success, course, message }
         } = await this.$axios.post('/api/courses', formData)
 
         if (!success) {
-          // TODO: Show error message
-          console.log('AN ERROR OCCURED WHILE CREATING COURSE')
+          this.$store.dispatch('updateMessage', {
+            variant: 'danger',
+            body: message
+          })
           return
         }
 

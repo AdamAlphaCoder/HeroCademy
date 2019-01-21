@@ -1,52 +1,79 @@
 <template>
-  <div id="loginForm">
-    <h5 id="headline" class="mb-5">{{ register ? 'Create an account' : 'Sign into your account' }}</h5>
+  <div id="loginForm" class="bg-white rounded shadow-7 w-400 mw-100 p-6">
+    <h5 class="mb-7">{{ register ? 'Create an account' : 'Sign into your account' }}</h5>
+
     <form @submit.prevent="auth">
       <p v-if="form.error" class="error">{{ form.error }}</p>
-      <input
-        v-if="register"
-        v-model="form.name"
-        class="form-control mb-3"
-        type="text"
-        name="name"
-        placeholder="Name"
-      >
-      <input
-        v-model="form.email"
-        class="form-control mb-3"
-        type="text"
-        name="email"
-        placeholder="Email"
-      >
-      <input
-        v-model="form.password"
-        class="form-control mb-3"
-        type="password"
-        name="password"
-        placeholder="Password"
-      >
-      <input
-        v-if="register"
-        v-model="form.passwordAgain"
-        class="form-control mb-3"
-        type="password"
-        name="passwordAgain"
-        placeholder="Confirm Password"
-      >
-      <button
-        class="btn btn-primary btn-block"
-        type="submit"
-      >{{ register ? 'Create account' : 'Sign in' }}</button>
+      <div class="form-group">
+        <input
+          v-if="register"
+          v-model="form.name"
+          type="text"
+          class="form-control"
+          name="name"
+          placeholder="Name"
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          v-model="form.email"
+          type="text"
+          class="form-control"
+          name="email"
+          placeholder="Email"
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          v-model="form.password"
+          type="password"
+          class="form-control"
+          name="password"
+          placeholder="Password"
+        >
+      </div>
+
+      <div class="form-group">
+        <input
+          v-if="register"
+          v-model="form.passwordAgain"
+          type="password"
+          class="form-control"
+          name="password"
+          placeholder="Confirm Password"
+        >
+      </div>
+
+      <div class="form-group flexbox py-3">
+        <a class="text-muted small-2" href="user-recover.html">Forgot password?</a>
+      </div>
+
+      <div class="form-group">
+        <button
+          class="btn btn-block btn-primary"
+          type="submit"
+        >{{ register ? 'Create account' : 'Sign in' }}</button>
+      </div>
     </form>
-    <button class="btn btn-success btn-block mt-3" @click="facebookLogin">Login with Facebook</button>
-    <small class="d-block text-center mt-3">
+
+    <div class="divider">Or Login With</div>
+    <div class="text-center">
+      <a class="btn btn-circle btn-sm btn-facebook mr-2" href="#" @click="facebookLogin">
+        <i class="fa fa-facebook"/>
+      </a>
+    </div>
+
+    <hr class="w-30">
+
+    <p class="text-center text-muted small-2">
       {{ register ? "Already a member?" : "Don't have an account?" }}
       <a
         href="#"
-        class="text-decoration-none"
         @click.prevent="register=!register"
       >{{ register ? 'Login here' : 'Register here' }}</a>
-    </small>
+    </p>
   </div>
 </template>
 
@@ -61,10 +88,7 @@ export default {
         password: '',
         passwordAgain: ''
       },
-      register: false,
-      loginFormStyle: {
-        width: '400px'
-      }
+      register: false
     }
   },
   methods: {
@@ -73,11 +97,20 @@ export default {
         if (this.register && this.form.password !== this.form.passwordAgain) {
           throw Error('Passwords should match')
         }
+
+        if (this.register && !this.form.name) {
+          throw Error('Enter your name')
+        }
         const action = this.register ? 'register' : 'login'
-        await this.$store.dispatch(action, {
+
+        const payload = {
           email: this.form.email,
           password: this.form.password
-        })
+        }
+
+        if (this.register) payload.name = this.form.name
+
+        await this.$store.dispatch(action, payload)
         this.$router.push('/')
       } catch (e) {
         this.form.error = e.message
@@ -92,32 +125,6 @@ export default {
 </script>
 
 <style>
-a {
-  text-decoration: underline;
-}
-
-#headline {
-  font-family: Dosis, sans-serif;
-}
-
-#loginForm {
-  position: relative;
-  background-color: white;
-  width: 100%;
-  padding: 2rem !important;
-  max-width: 400px;
-  box-shadow: 0 0 48px rgba(0, 0, 0, 0.06);
-  -webkit-box-shadow: 0 0 48px rgba(0, 0, 0, 0.06);
-  border-radius: 0.25rem !important;
-}
-.m {
-  border: 1px solid #888;
-  background: #ddd;
-  padding: 0.4em 0.8em;
-}
-.m form {
-  margin: 1em auto 0.2em;
-}
 .error {
   color: red;
 }

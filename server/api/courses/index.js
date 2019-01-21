@@ -50,9 +50,6 @@ router.post(
       const { name, description } = req.body
       const { _id: lecturer } = req.user
 
-      console.log('IMAGE IS')
-      console.log(req.file.location)
-
       const course = new Course({
         name,
         description,

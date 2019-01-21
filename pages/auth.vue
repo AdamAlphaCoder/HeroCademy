@@ -1,6 +1,6 @@
 <template>
-  <div id="login" :style="loginStyle">
-    <div class="container pt-5 d-flex justify-content-center">
+  <div class="layout-centered">
+    <div id="login" :style="loginStyle" class="main-content">
       <login-form/>
     </div>
   </div>

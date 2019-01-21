@@ -1,8 +1,8 @@
 <template>
-  <div class="container">
+  <div class="container mt-4">
     <h1>All courses available</h1>
 
-    <p v-for="course in courses" :key="course._id">{{ course.name }}</p>
+    <course-list-simple :courses="courses"/>
 
     <b-pagination-nav
       v-if="(courses || []).length"
@@ -18,7 +18,8 @@
 </template>
 
 <script>
-import CourseCardSmall from '~/components/courses/CourseCardSmall'
+import CourseListSimple from '~/components/courses/CourseListSimple'
+import CourseListDetailed from '~/components/courses/CourseListDetailed'
 
 export default {
   async asyncData(context) {
@@ -42,7 +43,8 @@ export default {
     }
   },
   components: {
-    CourseCardSmall
+    CourseListSimple,
+    CourseListDetailed
   },
   data() {
     return {
@@ -85,6 +87,6 @@ export default {
       }
     }
   },
-  middleware: 'auth'
+  middleware: 'checkAuth'
 }
 </script>

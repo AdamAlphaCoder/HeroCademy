@@ -1,7 +1,6 @@
 export const state = () => ({
   authUser: null,
-  message: null,
-  messageVariant: null
+  message: null
 })
 
 export const mutations = {
@@ -10,9 +9,6 @@ export const mutations = {
   },
   SET_MESSAGE: function(state, message) {
     state.message = message
-  },
-  SET_MESSAGEVARIANT: function(state, messageVariant) {
-    state.messageVariant = messageVariant
   }
 }
 
@@ -74,5 +70,8 @@ export const actions = {
     } catch (error) {
       throw new Error('Wrong password')
     }
+  },
+  updateMessage({ commit }, message) {
+    commit('SET_MESSAGE', message)
   }
 }
