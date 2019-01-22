@@ -2,6 +2,9 @@ const router = require('express').Router({ mergeParams: true })
 
 const sections = require('./sections')
 const reviews = require('./reviews')
+const upload = require('../../../upload')
+
+const checkLecturerStatus = require('../../../middleware/checkLecturerStatus')
 
 const Course = require('../../../models/Course')
 
@@ -27,38 +30,45 @@ router.get('/', async (req, res) => {
 })
 
 // Updates a single course
-router.patch('/', async (req, res) => {
-  // TODO: Check if user is the lecturer before proceeding
-  try {
-    const { body } = req
-    const keys = ['description', 'image']
+router.patch(
+  '/',
+  checkLecturerStatus,
+  upload.single('image'),
+  async (req, res) => {
+    // TODO: Check if user is the lecturer before proceeding
+    try {
+      const { body } = req
+      const keys = ['description']
 
-    const update = {}
+      const update = {}
 
-    keys.forEach(key => {
-      // eslint-disable-next-line
-      if (body[key]) update[key] = body[key]
-    })
+      keys.forEach(key => {
+        // eslint-disable-next-line
+        if (body[key]) update[key] = body[key]
+      })
 
-    const course = await Course.findOneAndUpdate(
-      {
-        slug: req.params.course
-      },
-      update,
-      { new: true }
-    ).lean()
+      if ((req.file || {}).location) update.image = req.file.location
 
-    res.json({
-      success: !!course,
-      course
-    })
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    })
+      const course = await Course.findOneAndUpdate(
+        {
+          slug: req.params.course
+        },
+        update,
+        { new: true }
+      ).lean()
+
+      res.json({
+        success: !!course,
+        course
+      })
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: err.message
+      })
+    }
   }
-})
+)
 
 router.delete('/', async (req, res) => {
   // TODO: Check if user is the lecturer before proceeding

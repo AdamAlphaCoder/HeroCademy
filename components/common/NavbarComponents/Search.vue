@@ -31,4 +31,8 @@ export default {
   width: 400px;
   max-width: 100%;
 }
+
+#searchBox > .input-group {
+  width: 100%;
+}
 </style>

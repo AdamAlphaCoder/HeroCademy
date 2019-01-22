@@ -18,7 +18,7 @@ export default {
   data() {
     return {
       loginStyle: {
-        height: '100vh',
+        minHeight: '100vh',
         backgroundImage: `url(${img})`,
         backgroundPosition: 'center',
         backgroundSize: 'cover',

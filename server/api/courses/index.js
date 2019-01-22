@@ -1,6 +1,7 @@
 const router = require('express').Router()
 
 const Course = require('../../models/Course')
+const User = require('../../models/User')
 
 const upload = require('../../upload')
 const _course = require('./_course')
@@ -22,6 +23,7 @@ router.get('/', async (req, res) => {
         .sort({ date: -1 })
         .skip(page * perPage)
         .limit(perPage)
+        .populate('lecturer', 'role name email image')
         .lean()
     }
 

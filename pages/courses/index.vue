@@ -86,7 +86,6 @@ export default {
         path: `/courses?page=${page}`
       }
     }
-  },
-  middleware: 'checkAuth'
+  }
 }
 </script>

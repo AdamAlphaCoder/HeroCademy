@@ -1,5 +1,5 @@
 <template>
-  <div class="courseListCards">
+  <div class="courseListCards row">
     <course-card-simple v-for="course in courses" :key="course._id" :course="course"/>
   </div>
 </template>

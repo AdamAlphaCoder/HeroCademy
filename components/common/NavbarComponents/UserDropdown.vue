@@ -63,7 +63,7 @@ export default {
 .dropdown-item:active {
   color: #000;
   text-decoration: none;
-  background-color: #f7f7f7;
+  background-color: #fff;
 }
 
 #userDropdownImage {
