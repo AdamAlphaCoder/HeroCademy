@@ -1,4 +1,5 @@
 const router = require('express').Router({ mergeParams: true })
+const mongoose = require('mongoose')
 
 const Course = require('../../../../models/Course')
 const CourseReview = require('../../../../models/CourseReview')
@@ -11,6 +12,13 @@ router.get('/', async (req, res) => {
     }).lean()
 
     if (!course) {
+      return res.json({
+        success: false,
+        courseReview: null
+      })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.json({
         success: false,
         courseReview: null
@@ -42,6 +50,13 @@ router.delete('/', async (req, res) => {
     }).lean()
 
     if (!course) {
+      return res.json({
+        success: false,
+        courseReview: null
+      })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.json({
         success: false,
         courseReview: null
@@ -85,6 +100,13 @@ router.patch('/', async (req, res) => {
     }).lean()
 
     if (!course) {
+      return res.json({
+        success: false,
+        courseReview: null
+      })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.json({
         success: false,
         courseReview: null

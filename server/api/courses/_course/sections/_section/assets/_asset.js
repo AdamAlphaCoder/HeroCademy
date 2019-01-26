@@ -1,4 +1,5 @@
 const router = require('express').Router({ mergeParams: true })
+const mongoose = require('mongoose')
 
 const Course = require('../../../../../../models/Course')
 const CourseSection = require('../../../../../../models/CourseSection')
@@ -18,8 +19,18 @@ router.get('/', async (req, res) => {
       })
     }
 
+    if (
+      !mongoose.Types.ObjectId.isValid(req.params.section) ||
+      !mongoose.Types.ObjectId.isValid(req.params.asset)
+    ) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -32,7 +43,7 @@ router.get('/', async (req, res) => {
 
     const courseSectionAsset = await CourseSectionAsset.findOne({
       courseSection: courseSection._id,
-      slug: req.params.asset
+      _id: req.params.asset
     }).lean()
 
     res.json({
@@ -61,8 +72,18 @@ router.delete('/', async (req, res) => {
       })
     }
 
+    if (
+      !mongoose.Types.ObjectId.isValid(req.params.section) ||
+      !mongoose.Types.ObjectId.isValid(req.params.asset)
+    ) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -75,7 +96,7 @@ router.delete('/', async (req, res) => {
 
     const courseSectionAsset = await CourseSectionAsset.findOneAndDelete({
       courseSection: courseSection._id,
-      slug: req.params.asset
+      _id: req.params.asset
     }).lean()
 
     res.json({
@@ -114,8 +135,18 @@ router.patch('/', async (req, res) => {
       })
     }
 
+    if (
+      !mongoose.Types.ObjectId.isValid(req.params.section) ||
+      !mongoose.Types.ObjectId.isValid(req.params.asset)
+    ) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -129,7 +160,7 @@ router.patch('/', async (req, res) => {
     const courseSectionAsset = await CourseSectionAsset.findOneAndUpdate(
       {
         courseSection: courseSection._id,
-        slug: req.params.asset
+        _id: req.params.asset
       },
       update,
       { new: true }

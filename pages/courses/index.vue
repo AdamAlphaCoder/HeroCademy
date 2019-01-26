@@ -22,6 +22,7 @@ import CourseListSimple from '~/components/courses/CourseListSimple'
 import CourseListDetailed from '~/components/courses/CourseListDetailed'
 
 export default {
+  middleware: 'checkAuth',
   async asyncData(context) {
     try {
       const page = Number(context.query.page) || 1

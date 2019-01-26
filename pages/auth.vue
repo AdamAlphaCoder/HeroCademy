@@ -12,6 +12,7 @@ import img from '~/assets/img/bg/4.jpg'
 
 export default {
   layout: 'nonavbarfooter',
+  middleware: 'noAuth',
   components: {
     LoginForm
   },

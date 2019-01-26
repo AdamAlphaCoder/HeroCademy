@@ -61,7 +61,7 @@ export default {
       // Prevent modal from closing
       evt.preventDefault()
       if (!this.description.length && !this.image) {
-        this.error = 'Description or image not entered'
+        this.error = 'Description or image not provided'
       } else {
         this.handleSubmit(true)
       }
@@ -71,6 +71,7 @@ export default {
       if (changed !== true) return
 
       try {
+        // TODO: Add a loading indicator when submitting this shit
         const formData = new FormData()
 
         if (this.description.length) {

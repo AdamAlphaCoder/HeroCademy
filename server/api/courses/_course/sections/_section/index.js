@@ -1,4 +1,5 @@
 const router = require('express').Router({ mergeParams: true })
+const mongoose = require('mongoose')
 
 const assets = require('./assets')
 
@@ -19,8 +20,15 @@ router.get('/', async (req, res) => {
       })
     }
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.section)) {
+      return res.json({
+        success: false,
+        courseSection: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -50,8 +58,15 @@ router.delete('/', async (req, res) => {
       })
     }
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.section)) {
+      return res.json({
+        success: false,
+        courseSection: null
+      })
+    }
+
     const courseSection = await CourseSection.findOneAndDelete({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -71,6 +86,7 @@ router.delete('/', async (req, res) => {
 router.patch('/', async (req, res) => {
   try {
     const { body } = req
+    // TODO: Update keys inside here
     const keys = []
 
     const update = {}
@@ -91,9 +107,16 @@ router.patch('/', async (req, res) => {
       })
     }
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.section)) {
+      return res.json({
+        success: false,
+        courseSection: null
+      })
+    }
+
     const courseSection = await CourseSection.findOneAndUpdate(
       {
-        slug: req.params.section,
+        _id: req.params.section,
         course: course._id
       },
       update,

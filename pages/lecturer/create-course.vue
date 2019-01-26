@@ -44,6 +44,8 @@ export default {
         formData.append('description', this.description)
         formData.append('image', this.image)
 
+        // TODO: Disable POSTing twice, and show loading indicator
+
         const {
           data: { success, course, message }
         } = await this.$axios.post('/api/courses', formData)

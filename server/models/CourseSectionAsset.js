@@ -1,5 +1,4 @@
 const { model, Schema } = require('mongoose')
-const URLSlugs = require('mongoose-url-slugs')
 
 const ASSET = require('./constants/ASSET')
 
@@ -14,7 +13,5 @@ const CourseSectionAssetSchema = new Schema({
   },
   courseSection: { type: Schema.Types.ObjectId, ref: 'CourseSection' }
 })
-
-CourseSectionAssetSchema.plugin(URLSlugs('name', { alwaysRecreate: true }))
 
 module.exports = model('CourseSectionAsset', CourseSectionAssetSchema)

@@ -7,6 +7,8 @@ const upload = require('../../../upload')
 const checkLecturerStatus = require('../../../middleware/checkLecturerStatus')
 
 const Course = require('../../../models/Course')
+const CourseSection = require('../../../models/CourseSection')
+const CourseSectionAsset = require('../../../models/CourseSectionAsset')
 
 // Gets a single course
 router.get('/', async (req, res) => {
@@ -17,9 +19,21 @@ router.get('/', async (req, res) => {
       .populate('lecturer', 'role email name image')
       .lean()
 
+    const courseSections = await CourseSection.find({
+      course: course._id
+    }).lean()
+
+    course.sections = courseSections
+
+    const courseSectionAssets = await CourseSectionAsset.find({
+      courseSection: { $in: courseSections.map(section => section._id) }
+    })
+
     res.json({
-      success: true,
-      course
+      success: !!course,
+      course,
+      courseSections,
+      courseSectionAssets
     })
   } catch (err) {
     res.status(500).json({

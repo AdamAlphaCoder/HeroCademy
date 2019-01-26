@@ -45,6 +45,7 @@
     "socket.io-client": "^2.2.0",
     "vue-instantsearch": "^1.7.0",
     "vue-moment": "^4.0.0",
+    "vuedraggable": "^2.17.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
