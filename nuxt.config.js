@@ -19,7 +19,7 @@ module.exports = {
   /*
   ** Customize the progress-bar color
   */
-  loading: { color: '#fff' },
+  loading: { color: '#50a1ff' },
 
   /*
   ** Global CSS
@@ -29,7 +29,10 @@ module.exports = {
   /*
   ** Plugins to load before mounting the App
   */
-  plugins: [{ src: '~/plugins/vue-moment.js' }],
+  plugins: [
+    { src: '~/plugins/vue-moment.js' },
+    { src: '~/plugins/vuedraggable.js' }
+  ],
 
   /*
   ** Nuxt.js modules

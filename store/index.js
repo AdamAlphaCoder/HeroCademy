@@ -72,6 +72,7 @@ export const actions = {
     }
   },
   updateMessage({ commit }, message) {
+    // Contains body and variant
     commit('SET_MESSAGE', message)
   }
 }

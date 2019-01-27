@@ -23,17 +23,21 @@ router.get('/', async (req, res) => {
       course: course._id
     }).lean()
 
-    course.sections = courseSections
-
     const courseSectionAssets = await CourseSectionAsset.find({
       courseSection: { $in: courseSections.map(section => section._id) }
     })
 
+    course.sections = courseSections.map(section => {
+      section.assets = courseSectionAssets.filter(
+        asset => String(asset.courseSection) === String(section._id)
+      )
+
+      return section
+    })
+
     res.json({
       success: !!course,
-      course,
-      courseSections,
-      courseSectionAssets
+      course
     })
   } catch (err) {
     res.status(500).json({
@@ -61,6 +65,7 @@ router.patch(
         if (body[key]) update[key] = body[key]
       })
 
+      // If image is provided, the URL of the image will be updated as well
       if ((req.file || {}).location) update.image = req.file.location
 
       const course = await Course.findOneAndUpdate(
