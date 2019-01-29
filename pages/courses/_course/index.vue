@@ -13,7 +13,7 @@
       @click="editCourse"
     >{{ sectionsDraggableOptions.disabled ? 'Edit' : 'Stop Editing' }} Course Content</b-button>
     <b-button class="mt-3" variant="danger" size="lg" block @click="deleteCourse">Delete</b-button>
-    <edit-course-details :course="course" :modal-show="modalShow" :hidden="onHidden"/>
+    <edit-course-details :course="course" :modal-show="modalShow" :hidden="onModalHidden"/>
 
     <course-details-accordion
       :sections="course.sections"
@@ -21,8 +21,7 @@
       :assets-draggable-options="assetsDraggableOptions"
       :handle-sections-change="onSectionsUpdate"
       :handle-assets-change="onAssetsUpdate"
-      :sections-get-component-data="sectionsGetComponentData"
-      :assets-get-component-data="assetsGetComponentData"
+      :get-component-data="getComponentData"
     />
   </div>
 </template>
@@ -58,28 +57,28 @@ export default {
     return {
       modalShow: false,
       editMode: false,
-      sectionsDraggableOptions: {
+      draggableOptions: {
         disabled: true,
-        group: 'sections',
-        animation: 100
-      },
-      assetsDraggableOptions: {
-        disabled: true,
-        group: 'assets',
         animation: 100
       }
     }
   },
+  computed: {
+    // Reduces redundant variables, will change when draggableOptions is updated
+    sectionsDraggableOptions: function() {
+      return Object.assign({ group: 'sections' }, this.draggableOptions)
+    },
+    assetsDraggableOptions: function() {
+      return Object.assign({ group: 'assets' }, this.draggableOptions)
+    }
+  },
   methods: {
-    onHidden(changesOccured) {
+    onModalHidden(changesOccured) {
       this.modalShow = false
       if (changesOccured === true) location.reload()
     },
     editCourse() {
-      this.sectionsDraggableOptions.disabled = !this.sectionsDraggableOptions
-        .disabled
-      this.assetsDraggableOptions.disabled = !this.assetsDraggableOptions
-        .disabled
+      this.draggableOptions.disabled = !this.draggableOptions.disabled
     },
     deleteCourse() {
       this.$store.dispatch('updateMessage', {
@@ -89,6 +88,8 @@ export default {
     },
     onNewSection() {},
     onNewAsset() {},
+    onAssetDelete() {},
+    onSectionDelete() {},
     onAssetsUpdate(assets, index) {
       // eslint-disable-next-line
       this.$set(this.course.sections[index], 'assets', assets)
@@ -96,27 +97,7 @@ export default {
     onSectionsUpdate(sections) {
       this.course.sections = sections
     },
-    onAssetDelete() {},
-    onSectionDelete() {},
-    sectionsGetComponentData() {
-      // TODO: Implement update here
-      return {
-        on: {
-          end: evt => {
-            console.log({
-              event: 'onEnd',
-              this: this,
-              item: evt.item,
-              from: evt.from.id,
-              to: evt.to.id,
-              oldIndex: evt.oldIndex,
-              newIndex: evt.newIndex
-            })
-          }
-        }
-      }
-    },
-    assetsGetComponentData() {
+    getComponentData() {
       // TODO: Implement update here
       return {
         on: {

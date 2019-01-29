@@ -1,57 +1,62 @@
 <template>
-  <div id="accordionContainer" class="mt-3">
-    <draggable
-      :value="sections"
-      :options="sectionsDraggableOptions"
-      :move="onMove"
-      element="div"
-      class="accordion"
-      role="tablist"
-      @start="sectionIsDragging=true"
-      @end="sectionIsDragging=false"
-      @input="handleSectionsChange($event)"
+  <draggable
+    id="accordionContainer"
+    :value="sections"
+    :options="sectionsDraggableOptions"
+    :move="onMove"
+    :component-data="getComponentData()"
+    element="div"
+    class="accordion mt-3"
+    role="tablist"
+    @start="sectionIsDragging=true"
+    @end="sectionIsDragging=false"
+    @input="handleSectionsChange($event)"
+  >
+    <b-card
+      v-for="(section, sectionIndex) in sections"
+      :key="section._id"
+      :id="`section-${sectionIndex}`"
+      no-body
+      class="mb-2"
     >
-      <b-card v-for="(section, sectionIndex) in sections" :key="section._id" no-body class="mb-2">
-        <b-card-header header-tag="header" class="p-0" role="tab">
-          <h5 class="card-title">
-            <a
-              :class="`${sectionsExpanded[sectionIndex] ? '' : 'collapsed'}${sectionsDraggableOptions.disabled ? '' : ' draggable'}`"
-              block
-              @click="updateAccordion(sectionIndex)"
-            >{{ section.name }}</a>
-          </h5>
-        </b-card-header>
-        <b-collapse
-          :id="`collapse-${sectionIndex}`"
-          v-model="sectionsExpanded[sectionIndex]"
-          :accordion="`accordion-${sectionIndex}`"
-          role="tabpanel"
-        >
-          <b-card-body>
-            <draggable
-              :value="section.assets"
-              :options="assetsDraggableOptions"
-              :move="onMove"
-              :component-data="assetsGetComponentData()"
-              :id="`section-${sectionIndex}`"
-              element="div"
-              @start="assetIsDragging=true"
-              @end="assetIsDragging=false"
-              @input="handleAssetsChange($event, sectionIndex)"
+      <b-card-header header-tag="header" class="p-0" role="tab">
+        <h5 class="card-title">
+          <a
+            :class="`${sectionsExpanded[sectionIndex] ? '' : 'collapsed'}${sectionsDraggableOptions.disabled ? '' : ' draggable'}`"
+            block
+            @click="updateAccordion(sectionIndex)"
+          >{{ section.name }}</a>
+        </h5>
+      </b-card-header>
+      <b-collapse
+        :id="`collapse-${sectionIndex}`"
+        v-model="sectionsExpanded[sectionIndex]"
+        :accordion="`accordion-${sectionIndex}`"
+        role="tabpanel"
+      >
+        <b-card-body>
+          <draggable
+            :value="section.assets"
+            :options="assetsDraggableOptions"
+            :move="onMove"
+            :id="`assetsContainer-${sectionIndex}`"
+            element="div"
+            @start="assetIsDragging=true"
+            @end="assetIsDragging=false"
+            @input="handleAssetsChange($event, sectionIndex)"
+          >
+            <div
+              v-for="asset in section.assets"
+              :key="asset._id"
+              :class="`${assetsDraggableOptions.disabled ? 'assetItems' : 'assetItems draggable'}`"
             >
-              <div
-                v-for="asset in section.assets"
-                :key="asset._id"
-                :class="`${assetsDraggableOptions.disabled ? 'assetItems' : 'assetItems draggable'}`"
-              >
-                <p class="card-text">{{ asset.name }}</p>
-              </div>
-            </draggable>
-          </b-card-body>
-        </b-collapse>
-      </b-card>
-    </draggable>
-  </div>
+              <p class="card-text">{{ asset.name }}</p>
+            </div>
+          </draggable>
+        </b-card-body>
+      </b-collapse>
+    </b-card>
+  </draggable>
 </template>
 
 <script>
@@ -81,11 +86,7 @@ export default {
       type: Function,
       required: true
     },
-    sectionsGetComponentData: {
-      type: Function,
-      required: true
-    },
-    assetsGetComponentData: {
+    getComponentData: {
       type: Function,
       required: true
     }
