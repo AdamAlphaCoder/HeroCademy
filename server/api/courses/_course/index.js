@@ -27,13 +27,15 @@ router.get('/', async (req, res) => {
       courseSection: { $in: courseSections.map(section => section._id) }
     })
 
-    course.sections = courseSections.map(section => {
-      section.assets = courseSectionAssets.filter(
-        asset => String(asset.courseSection) === String(section._id)
-      )
+    course.sections = courseSections
+      .map(section => {
+        section.assets = courseSectionAssets
+          .filter(asset => String(asset.courseSection) === String(section._id))
+          .sort((a, b) => a.position - b.position)
 
-      return section
-    })
+        return section
+      })
+      .sort((a, b) => a.position - b.position)
 
     res.json({
       success: !!course,

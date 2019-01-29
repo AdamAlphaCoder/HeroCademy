@@ -33,7 +33,9 @@ router.get('/', async (req, res) => {
 
     const courseSectionAssets = await CourseSectionAsset.find({
       courseSection: courseSection._id
-    }).lean()
+    })
+      .sort({ position: 1 })
+      .lean()
 
     return res.json({
       success: !!courseSectionAssets.length,

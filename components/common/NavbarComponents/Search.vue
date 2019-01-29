@@ -4,7 +4,9 @@
       <b-input-group>
         <b-form-input v-model="searchTerm" placeholder="Search here..." size="md" type="text"/>
         <b-input-group-append>
-          <b-btn variant="warning">Search</b-btn>
+          <b-btn variant="warning">
+            <i class="fa fa-search" aria-hidden="true"/>
+          </b-btn>
         </b-input-group-append>
       </b-input-group>
     </b-nav-form>

@@ -1,82 +1,100 @@
 <template>
   <div id="accordionContainer" class="mt-3">
-    <div class="accordion" role="tablist">
-      <b-card v-for="(section, index) in sections" :key="section._id" no-body class="mb-2">
+    <draggable
+      :value="sections"
+      :options="sectionsDraggableOptions"
+      :move="onMove"
+      element="div"
+      class="accordion"
+      role="tablist"
+      @start="sectionIsDragging=true"
+      @end="sectionIsDragging=false"
+      @input="handleSectionsChange($event)"
+    >
+      <b-card v-for="(section, sectionIndex) in sections" :key="section._id" no-body class="mb-2">
         <b-card-header header-tag="header" class="p-0" role="tab">
           <h5 class="card-title">
             <a
-              :class="`${sectionsExpanded[index] ? '' : 'collapsed'}`"
+              :class="`${sectionsExpanded[sectionIndex] ? '' : 'collapsed'}${sectionsDraggableOptions.disabled ? '' : ' draggable'}`"
               block
-              @click="updateAccordion(index)"
+              @click="updateAccordion(sectionIndex)"
             >{{ section.name }}</a>
           </h5>
         </b-card-header>
         <b-collapse
-          :id="`section${index}`"
-          v-model="sectionsExpanded[index]"
-          :accordion="`accordion-${index}`"
+          :id="`collapse-${sectionIndex}`"
+          v-model="sectionsExpanded[sectionIndex]"
+          :accordion="`accordion-${sectionIndex}`"
           role="tabpanel"
         >
           <b-card-body>
             <draggable
               :value="section.assets"
-              :options="options"
+              :options="assetsDraggableOptions"
               :move="onMove"
+              :component-data="assetsGetComponentData()"
+              :id="`section-${sectionIndex}`"
               element="div"
-              @start="isDragging=true"
-              @end="isDragging=false"
-              @input="handleSectionChange($event, index)"
+              @start="assetIsDragging=true"
+              @end="assetIsDragging=false"
+              @input="handleAssetsChange($event, sectionIndex)"
             >
-              <p v-for="asset in section.assets" :key="asset._id" class="card-text">{{ asset.name }}</p>
+              <div
+                v-for="asset in section.assets"
+                :key="asset._id"
+                :class="`${assetsDraggableOptions.disabled ? 'assetItems' : 'assetItems draggable'}`"
+              >
+                <p class="card-text">{{ asset.name }}</p>
+              </div>
             </draggable>
           </b-card-body>
         </b-collapse>
       </b-card>
-    </div>
+    </draggable>
   </div>
 </template>
 
 <script>
 // TODO: Add Update Course Sections and Assets functionality
 // TODO: When in update mode, expand all sections
+// TODO: When an error occurs while updating course contents, throw error on page with this.$nuxt.error()
+
 export default {
   props: {
     sections: {
       type: Array,
       required: true
     },
-    editMode: {
-      type: Boolean,
+    sectionsDraggableOptions: {
+      type: Object,
       required: true
     },
-    handleSectionChange: {
+    assetsDraggableOptions: {
+      type: Object,
+      required: true
+    },
+    handleAssetsChange: {
+      type: Function,
+      required: true
+    },
+    handleSectionsChange: {
+      type: Function,
+      required: true
+    },
+    sectionsGetComponentData: {
+      type: Function,
+      required: true
+    },
+    assetsGetComponentData: {
       type: Function,
       required: true
     }
-    // onDragEnd: {
-    //   type: Function,
-    //   required: true
-    // }
   },
   data() {
     return {
       sectionsExpanded: (this.sections || []).map(section => false),
-      isDragging: false,
-      options: {
-        group: 'sections',
-        animation: 100,
-        onEnd: evt => {
-          console.log({
-            event: name,
-            this: this,
-            item: evt.item,
-            from: evt.from,
-            to: evt.to,
-            oldIndex: evt.oldIndex,
-            newIndex: evt.newIndex
-          })
-        }
-      }
+      sectionIsDragging: false,
+      assetIsDragging: false
     }
   },
   methods: {
@@ -92,3 +110,17 @@ export default {
   }
 }
 </script>
+
+<style>
+.assetItems {
+  padding: 1rem;
+  background-color: #f9fafb;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.draggable {
+  cursor: move !important;
+}
+</style>

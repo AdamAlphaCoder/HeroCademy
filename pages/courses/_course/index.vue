@@ -5,14 +5,24 @@
     <p>{{ course.description }}</p>
     <small>{{ course.date | moment('DD MMM YYYY') }}</small>
     <b-button variant="success" size="lg" block @click="modalShow = !modalShow">Edit Course Info</b-button>
-    <b-button class="mt-3" variant="primary" size="lg" block @click="editCourse">Edit Course Content</b-button>
+    <b-button
+      :variant="sectionsDraggableOptions.disabled && assetsDraggableOptions.disabled ? 'primary' : 'warning'"
+      class="mt-3"
+      size="lg"
+      block
+      @click="editCourse"
+    >{{ sectionsDraggableOptions.disabled ? 'Edit' : 'Stop Editing' }} Course Content</b-button>
     <b-button class="mt-3" variant="danger" size="lg" block @click="deleteCourse">Delete</b-button>
     <edit-course-details :course="course" :modal-show="modalShow" :hidden="onHidden"/>
 
     <course-details-accordion
       :sections="course.sections"
-      :edit-mode="editMode"
-      :handle-section-change="onSectionUpdate"
+      :sections-draggable-options="sectionsDraggableOptions"
+      :assets-draggable-options="assetsDraggableOptions"
+      :handle-sections-change="onSectionsUpdate"
+      :handle-assets-change="onAssetsUpdate"
+      :sections-get-component-data="sectionsGetComponentData"
+      :assets-get-component-data="assetsGetComponentData"
     />
   </div>
 </template>
@@ -47,22 +57,29 @@ export default {
   data() {
     return {
       modalShow: false,
-      editMode: false
+      editMode: false,
+      sectionsDraggableOptions: {
+        disabled: true,
+        group: 'sections',
+        animation: 100
+      },
+      assetsDraggableOptions: {
+        disabled: true,
+        group: 'assets',
+        animation: 100
+      }
     }
   },
   methods: {
     onHidden(changesOccured) {
       this.modalShow = false
-      if (changesOccured === true) {
-        console.log('REFRESH PAGE')
-        location.reload()
-      }
+      if (changesOccured === true) location.reload()
     },
     editCourse() {
-      this.$store.dispatch('updateMessage', {
-        variant: 'warning',
-        body: 'Edit content functionality not yet implemented!'
-      })
+      this.sectionsDraggableOptions.disabled = !this.sectionsDraggableOptions
+        .disabled
+      this.assetsDraggableOptions.disabled = !this.assetsDraggableOptions
+        .disabled
     },
     deleteCourse() {
       this.$store.dispatch('updateMessage', {
@@ -72,13 +89,51 @@ export default {
     },
     onNewSection() {},
     onNewAsset() {},
-    onSectionUpdate(assets, index) {
+    onAssetsUpdate(assets, index) {
       // eslint-disable-next-line
       this.$set(this.course.sections[index], 'assets', assets)
     },
+    onSectionsUpdate(sections) {
+      this.course.sections = sections
+    },
+    onAssetDelete() {},
     onSectionDelete() {},
-    onAssetUpdate() {},
-    onAssetDelete() {}
+    sectionsGetComponentData() {
+      // TODO: Implement update here
+      return {
+        on: {
+          end: evt => {
+            console.log({
+              event: 'onEnd',
+              this: this,
+              item: evt.item,
+              from: evt.from.id,
+              to: evt.to.id,
+              oldIndex: evt.oldIndex,
+              newIndex: evt.newIndex
+            })
+          }
+        }
+      }
+    },
+    assetsGetComponentData() {
+      // TODO: Implement update here
+      return {
+        on: {
+          end: evt => {
+            console.log({
+              event: 'onEnd',
+              this: this,
+              item: evt.item,
+              from: evt.from.id,
+              to: evt.to.id,
+              oldIndex: evt.oldIndex,
+              newIndex: evt.newIndex
+            })
+          }
+        }
+      }
+    }
   }
 }
 </script>
