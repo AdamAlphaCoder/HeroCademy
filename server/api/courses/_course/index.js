@@ -1,4 +1,5 @@
 const router = require('express').Router({ mergeParams: true })
+const mongoose = require('mongoose')
 
 const sections = require('./sections')
 const reviews = require('./reviews')
@@ -25,7 +26,7 @@ router.get('/', async (req, res) => {
 
     const courseSectionAssets = await CourseSectionAsset.find({
       courseSection: { $in: courseSections.map(section => section._id) }
-    })
+    }).lean()
 
     course.sections = courseSections
       .map(section => {
@@ -91,6 +92,7 @@ router.patch(
   }
 )
 
+// Deletes a single course
 router.delete('/', async (req, res) => {
   // TODO: Check if user is the lecturer before proceeding
   try {
@@ -101,6 +103,111 @@ router.delete('/', async (req, res) => {
     res.json({
       success: !!course,
       course
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    })
+  }
+})
+
+// Updates course sections order
+router.put('/updateSectionsOrder', async (req, res) => {
+  try {
+    const sections = req.body.sections
+
+    if (!Array.isArray(sections)) {
+      throw new Error('No array provided!')
+    }
+
+    sections.forEach(section => {
+      if (!mongoose.Types.ObjectId.isValid(section)) {
+        throw new Error('Invalid ID(s) provided!')
+      }
+    })
+
+    const course = await Course.findOne({
+      slug: req.params.course
+    }).lean()
+
+    if (!course) {
+      return res.json({
+        success: false
+      })
+    }
+
+    await Promise.all(
+      sections.map((section, index) =>
+        CourseSection.update(
+          // eslint-disable-next-line
+          { _id: { $in: section }, course: course._id },
+          { $set: { position: index } }
+        )
+      )
+    )
+
+    res.json({
+      success: true
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    })
+  }
+})
+
+// Update course sections assets order
+router.put('/updateAssetsOrder', async (req, res) => {
+  try {
+    // TODO: Later on, ensure that firstSection and secondSection are section objects?
+
+    const firstSection = req.body.firstSection
+    const secondSection = req.body.secondSection
+
+    const course = await Course.findOne({
+      slug: req.params.course
+    }).lean()
+
+    if (!course) {
+      return res.json({
+        success: false
+      })
+    }
+
+    if (!firstSection) {
+      return res.status(422).json({
+        success: false,
+        message: 'First Section not provided'
+      })
+    }
+
+    await Promise.all(
+      firstSection.assets.map((asset, index) =>
+        CourseSectionAsset.update(
+          // eslint-disable-next-line
+          { _id: { $in: asset._id } },
+          { $set: { position: index, courseSection: firstSection._id } }
+        )
+      )
+    )
+
+    if (secondSection) {
+      // Only do this if second section is provided
+      await Promise.all(
+        secondSection.assets.map((asset, index) =>
+          CourseSectionAsset.update(
+            // eslint-disable-next-line
+            { _id: { $in: asset._id } },
+            { $set: { position: index, courseSection: secondSection._id } }
+          )
+        )
+      )
+    }
+
+    res.json({
+      success: true
     })
   } catch (err) {
     res.status(500).json({

@@ -27,6 +27,9 @@
 </template>
 
 <script>
+// TODO: Prevent adding of sections and assets while order is being updated
+import _ from 'lodash'
+
 import EditCourseDetails from '~/components/course/EditCourseDetails'
 import CourseDetailsAccordion from '~/components/course/CourseDetailsAccordion'
 
@@ -97,20 +100,70 @@ export default {
     onSectionsUpdate(sections) {
       this.course.sections = sections
     },
+    updateSectionsOrder: _.debounce(async function(context) {
+      try {
+        const ids = this.course.sections.map(section => section._id)
+
+        await this.$axios.put(
+          `/api/courses/${this.course.slug}/updateSectionsOrder`,
+          {
+            sections: ids
+          }
+        )
+
+        console.log(ids)
+
+        window.onbeforeunload = null
+      } catch (err) {
+        console.error(err)
+      }
+    }, 1500),
+    updateAssetsOrder: _.debounce(async function({
+      from,
+      to,
+      oldIndex,
+      newIndex
+    }) {
+      try {
+        await this.$axios.put(
+          `/api/courses/${this.course.slug}/updateAssetsOrder`,
+          {
+            // eslint-disable-next-line
+            firstSection: this.course.sections[from],
+            // eslint-disable-next-line
+            secondSection: this.course.sections[to]
+          }
+        )
+
+        window.onbeforeunload = null
+      } catch (err) {
+        console.error(err)
+      }
+    },
+    1500),
     getComponentData() {
       // TODO: Implement update here
       return {
         on: {
           end: evt => {
-            console.log({
-              event: 'onEnd',
+            const context = {
               this: this,
               item: evt.item,
-              from: evt.from.id,
-              to: evt.to.id,
+              from: Number(evt.from.id.split('-')[1]),
+              to: Number(evt.to.id.split('-')[1]),
               oldIndex: evt.oldIndex,
               newIndex: evt.newIndex
-            })
+            }
+
+            // PREVENTS THE USER FROM NAVIGATING AWAY WHILE UPDATE IS IN PROGRESS
+            window.onbeforeunload = function() {
+              return 'Are you sure you want to navigate away?'
+            }
+
+            evt.from.id === 'accordionContainer' &&
+            evt.to.id === 'accordionContainer'
+              ? this.updateSectionsOrder(context)
+              : this.updateAssetsOrder(context)
           }
         }
       }

@@ -50,7 +50,8 @@
               :key="asset._id"
               :class="`${assetsDraggableOptions.disabled ? 'assetItems' : 'assetItems draggable'}`"
             >
-              <p class="card-text">{{ asset.name }}</p>
+              <a href="#">{{ asset.name }}</a>
+              <p class="card-text">{{ asset.description }}</p>
             </div>
           </draggable>
         </b-card-body>
@@ -61,7 +62,6 @@
 
 <script>
 // TODO: Add Update Course Sections and Assets functionality
-// TODO: When in update mode, expand all sections
 // TODO: When an error occurs while updating course contents, throw error on page with this.$nuxt.error()
 
 export default {
