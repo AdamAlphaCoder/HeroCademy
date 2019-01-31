@@ -186,8 +186,7 @@ router.put('/updateAssetsOrder', async (req, res) => {
     await Promise.all(
       firstSection.assets.map((asset, index) =>
         CourseSectionAsset.update(
-          // eslint-disable-next-line
-          { _id: { $in: asset._id } },
+          { _id: asset._id },
           { $set: { position: index, courseSection: firstSection._id } }
         )
       )
@@ -196,19 +195,18 @@ router.put('/updateAssetsOrder', async (req, res) => {
     // Check if there's duplicates assets with the same position
     const firstSectionLastAssetPosition =
       (await CourseSectionAsset.count({
-        _id: firstSection._id
+        course: firstSection._id
       }).lean()) - 1
 
-    const firstSectionLastAssetExists = await CourseSectionAsset.count({
-      position: firstSectionLastAssetPosition
+    const firstSectionAffectedDocuments = await CourseSectionAsset.find({
+      course: firstSection._id,
+      position: firstSectionLastAssetPosition - 1
     })
+      .sort({ _id: 1 })
+      .lean()
 
-    if (firstSectionLastAssetExists === 0) {
-      // There's two assets with position n - 1
-      const firstSectionAffectedDocuments = await CourseSectionAsset.find({
-        position: firstSectionLastAssetPosition - 1
-      }).lean()
-
+    // There's two assets with position n - 1
+    if (firstSectionAffectedDocuments.length === 2) {
       await CourseSectionAsset.findByIdAndUpdate(
         firstSectionAffectedDocuments[1]._id,
         {
@@ -222,8 +220,7 @@ router.put('/updateAssetsOrder', async (req, res) => {
       await Promise.all(
         secondSection.assets.map((asset, index) =>
           CourseSectionAsset.update(
-            // eslint-disable-next-line
-            { _id: { $in: asset._id } },
+            { _id: asset._id },
             { $set: { position: index, courseSection: secondSection._id } }
           )
         )
@@ -234,19 +231,18 @@ router.put('/updateAssetsOrder', async (req, res) => {
       // Check if there's duplicates assets with the same position
       const secondSectionLastAssetPosition =
         (await CourseSectionAsset.count({
-          _id: secondSection._id
+          course: secondSection._id
         }).lean()) - 1
 
-      const secondSectionLastAssetExists = await CourseSectionAsset.count({
-        position: secondSectionLastAssetPosition
+      const secondSectionAffectedDocuments = await CourseSectionAsset.find({
+        course: secondSection._id,
+        position: secondSectionLastAssetPosition - 1
       })
+        .sort({ _id: 1 })
+        .lean()
 
-      if (secondSectionLastAssetExists === 0) {
-        // There's two assets with position n - 1
-        const secondSectionAffectedDocuments = await CourseSectionAsset.find({
-          position: secondSectionLastAssetPosition - 1
-        }).lean()
-
+      // There's two assets with position n - 1
+      if (secondSectionAffectedDocuments.length === 2) {
         await CourseSectionAsset.findByIdAndUpdate(
           secondSectionAffectedDocuments[1]._id,
           {

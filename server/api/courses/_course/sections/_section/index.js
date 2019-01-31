@@ -73,6 +73,21 @@ router.delete('/', async (req, res) => {
       course: course._id
     }).lean()
 
+    if (courseSection) {
+      const allSections = await CourseSection.find({})
+        .sort({ position: 1 })
+        .lean()
+
+      await Promise.all(
+        allSections.map((section, index) =>
+          CourseSection.update(
+            { _id: section._id },
+            { $set: { position: index } }
+          )
+        )
+      )
+    }
+
     res.json({
       success: !!courseSection,
       courseSection
