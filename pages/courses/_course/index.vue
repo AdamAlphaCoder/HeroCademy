@@ -6,19 +6,19 @@
     <small>{{ course.date | moment('DD MMM YYYY') }}</small>
     <b-button variant="success" size="lg" block @click="modalShow = !modalShow">Edit Course Info</b-button>
     <b-button
-      :variant="sectionsDraggableOptions.disabled && assetsDraggableOptions.disabled ? 'primary' : 'warning'"
+      :variant="editMode ? 'warning' : 'primary'"
       class="mt-3"
       size="lg"
       block
       @click="editCourse"
-    >{{ sectionsDraggableOptions.disabled ? 'Edit' : 'Stop Editing' }} Course Content</b-button>
+    >{{ editMode ? 'Stop Editing' : 'Edit' }} Course Content</b-button>
     <b-button class="mt-3" variant="danger" size="lg" block @click="deleteCourse">Delete</b-button>
     <edit-course-details :course="course" :modal-show="modalShow" :hidden="onModalHidden"/>
 
     <course-details-accordion
+      :updating="updating"
+      :edit-mode="editMode"
       :sections="course.sections"
-      :sections-draggable-options="sectionsDraggableOptions"
-      :assets-draggable-options="assetsDraggableOptions"
       :handle-sections-change="onSectionsUpdate"
       :handle-assets-change="onAssetsUpdate"
       :get-component-data="getComponentData"
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-// TODO: Prevent adding of sections and assets while order is being updated
+// TODO: Prevent adding of sections and assets, and updating of order while updating
 import _ from 'lodash'
 
 import EditCourseDetails from '~/components/course/EditCourseDetails'
@@ -59,21 +59,15 @@ export default {
   data() {
     return {
       modalShow: false,
-      editMode: false,
-      draggableOptions: {
-        disabled: true,
-        animation: 100
-      }
+      updating: false,
+      editMode: false
     }
   },
-  computed: {
-    // Reduces redundant variables, will change when draggableOptions is updated
-    sectionsDraggableOptions: function() {
-      return Object.assign({ group: 'sections' }, this.draggableOptions)
-    },
-    assetsDraggableOptions: function() {
-      return Object.assign({ group: 'assets' }, this.draggableOptions)
-    }
+  beforeMount() {
+    window.addEventListener('beforeunload', this.unload)
+  },
+  beforeDestroy() {
+    window.removeEventListener('beforeunload', this.unload)
   },
   methods: {
     onModalHidden(changesOccured) {
@@ -81,7 +75,7 @@ export default {
       if (changesOccured === true) location.reload()
     },
     editCourse() {
-      this.draggableOptions.disabled = !this.draggableOptions.disabled
+      this.editMode = !this.editMode
     },
     deleteCourse() {
       this.$store.dispatch('updateMessage', {
@@ -111,19 +105,12 @@ export default {
           }
         )
 
-        console.log(ids)
-
-        window.onbeforeunload = null
+        this.updating = false
       } catch (err) {
         console.error(err)
       }
     }, 1500),
-    updateAssetsOrder: _.debounce(async function({
-      from,
-      to,
-      oldIndex,
-      newIndex
-    }) {
+    updateAssetsOrder: _.debounce(async function({ from, to }) {
       try {
         await this.$axios.put(
           `/api/courses/${this.course.slug}/updateAssetsOrder`,
@@ -135,14 +122,12 @@ export default {
           }
         )
 
-        window.onbeforeunload = null
+        this.updating = false
       } catch (err) {
         console.error(err)
       }
-    },
-    1500),
+    }, 1500),
     getComponentData() {
-      // TODO: Implement update here
       return {
         on: {
           end: evt => {
@@ -156,9 +141,7 @@ export default {
             }
 
             // PREVENTS THE USER FROM NAVIGATING AWAY WHILE UPDATE IS IN PROGRESS
-            window.onbeforeunload = function() {
-              return 'Are you sure you want to navigate away?'
-            }
+            this.updating = true
 
             evt.from.id === 'accordionContainer' &&
             evt.to.id === 'accordionContainer'
@@ -167,6 +150,26 @@ export default {
           }
         }
       }
+    },
+    unload($event) {
+      if (!this.updating) return true
+      const confirmationMessage =
+        'Do you really want to leave? you have unsaved changes!'
+
+      $event.returnValue = confirmationMessage // Gecko, Trident, Chrome 34+
+      return confirmationMessage // Gecko, WebKit, Chrome <34
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    if (!this.updating) return next()
+
+    const answer = window.confirm(
+      'Do you really want to leave? you have unsaved changes!'
+    )
+    if (answer) {
+      next()
+    } else {
+      next(false)
     }
   }
 }

@@ -66,16 +66,16 @@
 
 export default {
   props: {
+    updating: {
+      type: Boolean,
+      required: true
+    },
+    editMode: {
+      type: Boolean,
+      required: true
+    },
     sections: {
       type: Array,
-      required: true
-    },
-    sectionsDraggableOptions: {
-      type: Object,
-      required: true
-    },
-    assetsDraggableOptions: {
-      type: Object,
       required: true
     },
     handleAssetsChange: {
@@ -96,6 +96,21 @@ export default {
       sectionsExpanded: (this.sections || []).map(section => false),
       sectionIsDragging: false,
       assetIsDragging: false
+    }
+  },
+  computed: {
+    // Reduces redundant variables, will change when draggableOptions is updated
+    sectionsDraggableOptions: function() {
+      return Object.assign({ group: 'sections' }, this.draggableOptions)
+    },
+    assetsDraggableOptions: function() {
+      return Object.assign({ group: 'assets' }, this.draggableOptions)
+    },
+    draggableOptions: function() {
+      return {
+        disabled: !this.editMode && !this.updating,
+        animation: 100
+      }
     }
   },
   methods: {

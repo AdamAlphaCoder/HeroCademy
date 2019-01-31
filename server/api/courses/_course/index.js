@@ -193,6 +193,30 @@ router.put('/updateAssetsOrder', async (req, res) => {
       )
     )
 
+    // Check if there's duplicates assets with the same position
+    const firstSectionLastAssetPosition =
+      (await CourseSectionAsset.count({
+        _id: firstSection._id
+      }).lean()) - 1
+
+    const firstSectionLastAssetExists = await CourseSectionAsset.count({
+      position: firstSectionLastAssetPosition
+    })
+
+    if (firstSectionLastAssetExists === 0) {
+      // There's two assets with position n - 1
+      const firstSectionAffectedDocuments = await CourseSectionAsset.find({
+        position: firstSectionLastAssetPosition - 1
+      }).lean()
+
+      await CourseSectionAsset.findByIdAndUpdate(
+        firstSectionAffectedDocuments[1]._id,
+        {
+          position: firstSectionLastAssetPosition
+        }
+      )
+    }
+
     if (secondSection) {
       // Only do this if second section is provided
       await Promise.all(
@@ -204,6 +228,32 @@ router.put('/updateAssetsOrder', async (req, res) => {
           )
         )
       )
+
+      // REDUNDANT CODE, REFACTOR?
+
+      // Check if there's duplicates assets with the same position
+      const secondSectionLastAssetPosition =
+        (await CourseSectionAsset.count({
+          _id: secondSection._id
+        }).lean()) - 1
+
+      const secondSectionLastAssetExists = await CourseSectionAsset.count({
+        position: secondSectionLastAssetPosition
+      })
+
+      if (secondSectionLastAssetExists === 0) {
+        // There's two assets with position n - 1
+        const secondSectionAffectedDocuments = await CourseSectionAsset.find({
+          position: secondSectionLastAssetPosition - 1
+        }).lean()
+
+        await CourseSectionAsset.findByIdAndUpdate(
+          secondSectionAffectedDocuments[1]._id,
+          {
+            position: secondSectionLastAssetPosition
+          }
+        )
+      }
     }
 
     res.json({
