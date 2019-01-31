@@ -91,7 +91,7 @@ router.patch('/', async (req, res) => {
     const update = {}
 
     keys.forEach(key => {
-      // eslint-disable-next-line
+      
       if (body[key]) update[key] = body[key]
     })
 

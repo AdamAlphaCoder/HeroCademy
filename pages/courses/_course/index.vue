@@ -16,6 +16,7 @@
     <edit-course-details :course="course" :modal-show="modalShow" :hidden="onModalHidden"/>
 
     <course-details-accordion
+      :slug="course.slug"
       :updating="updating"
       :edit-mode="editMode"
       :sections="course.sections"
@@ -27,7 +28,6 @@
 </template>
 
 <script>
-// TODO: Prevent adding of sections and assets, and updating of order while updating
 import _ from 'lodash'
 
 import EditCourseDetails from '~/components/course/EditCourseDetails'
@@ -88,7 +88,6 @@ export default {
     onAssetDelete() {},
     onSectionDelete() {},
     onAssetsUpdate(assets, index) {
-      // eslint-disable-next-line
       this.$set(this.course.sections[index], 'assets', assets)
     },
     onSectionsUpdate(sections) {
@@ -115,9 +114,8 @@ export default {
         await this.$axios.put(
           `/api/courses/${this.course.slug}/updateAssetsOrder`,
           {
-            // eslint-disable-next-line
             firstSection: this.course.sections[from],
-            // eslint-disable-next-line
+
             secondSection: this.course.sections[to]
           }
         )

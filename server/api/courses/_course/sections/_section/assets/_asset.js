@@ -94,8 +94,6 @@ router.delete('/', async (req, res) => {
       })
     }
 
-    // TODO: Update the positions of all the other assets
-
     const courseSectionAsset = await CourseSectionAsset.findOneAndDelete({
       courseSection: courseSection._id,
       _id: req.params.asset
@@ -139,7 +137,7 @@ router.patch('/', async (req, res) => {
     const update = {}
 
     keys.forEach(key => {
-      // eslint-disable-next-line
+      
       if (body[key]) update[key] = body[key]
     })
 

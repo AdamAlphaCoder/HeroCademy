@@ -105,12 +105,11 @@ router.patch('/', async (req, res) => {
   try {
     const { body } = req
     // TODO: Update keys inside here
-    const keys = []
+    const keys = ['name']
 
     const update = {}
 
     keys.forEach(key => {
-      // eslint-disable-next-line
       if (body[key]) update[key] = body[key]
     })
 
