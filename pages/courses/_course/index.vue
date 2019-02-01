@@ -106,7 +106,7 @@ export default {
 
         this.updating = false
       } catch (err) {
-        console.error(err)
+        this.$nuxt.error({ message: err.message })
       }
     }, 1500),
     updateAssetsOrder: _.debounce(async function({ from, to }) {
@@ -122,7 +122,7 @@ export default {
 
         this.updating = false
       } catch (err) {
-        console.error(err)
+        this.$nuxt.error({ message: err.message })
       }
     }, 1500),
     getComponentData() {

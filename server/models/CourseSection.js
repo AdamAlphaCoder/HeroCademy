@@ -8,8 +8,6 @@ const CourseSectionSchema = new Schema({
 
 CourseSectionSchema.pre('save', function(next) {
   // Only increment when the document is new and position doesn't exist
-  console.log('HAI')
-  console.log(this.isNew)
   if (this.isNew && !this.position) {
     CourseSection.count({ course: this.course }).then(res => {
       this.position = res // Increment count

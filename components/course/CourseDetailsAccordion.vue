@@ -7,7 +7,7 @@
       :move="onMove"
       :component-data="getComponentData()"
       element="div"
-      class="accordion mt-3"
+      class="accordion my-5"
       role="tablist"
       @start="sectionIsDragging=true"
       @end="sectionIsDragging=false"
@@ -18,7 +18,7 @@
         :key="section._id"
         :id="`section-${sectionIndex}`"
         no-body
-        class="mb-2"
+        class="mb-2 draggableSections"
       >
         <b-card-header header-tag="header" class="p-0" role="tab">
           <h5 class="card-title">
@@ -59,6 +59,15 @@
           </b-card-body>
         </b-collapse>
       </b-card>
+      <div v-if="editMode" class="card newSection">
+        <h5 class="card-title">
+          <a @click="editSectionIndex = -9999">
+            <span class="mr-2">
+              <i class="fa fa-plus" aria-hidden="true"/>
+            </span> New Section
+          </a>
+        </h5>
+      </div>
     </draggable>
     <edit-course-section-details
       :hidden="onEditSectionHidden"
@@ -119,10 +128,16 @@ export default {
   computed: {
     // Reduces redundant variables, will change when draggableOptions is updated
     sectionsDraggableOptions() {
-      return Object.assign({ group: 'sections' }, this.draggableOptions)
+      return Object.assign(
+        { group: 'sections', draggable: '.draggableSections' },
+        this.draggableOptions
+      )
     },
     assetsDraggableOptions() {
-      return Object.assign({ group: 'assets' }, this.draggableOptions)
+      return Object.assign(
+        { group: 'assets', draggable: '.assetItems' },
+        this.draggableOptions
+      )
     },
     draggableOptions() {
       return {
@@ -148,13 +163,23 @@ export default {
     },
     async editSectionDetails(index, { name } = { name: null }) {
       try {
-        await this.$axios.patch(
-          `/api/courses/${this.slug}/sections/${this.sections[index]._id}`,
-          { name }
-        )
+        const createNewMode = index === -9999
+        // If true, create new section instead of updating
+        const response = createNewMode
+          ? await this.$axios.post(`/api/courses/${this.slug}/sections`, {
+              name
+            })
+          : await this.$axios.patch(
+              `/api/courses/${this.slug}/sections/${this.sections[index]._id}`,
+              { name }
+            )
 
         const updatedSections = this.sections.slice(0)
-        updatedSections[index].name = name
+
+        createNewMode
+          ? updatedSections.push(response.data.courseSection)
+          : (updatedSections[index].name = name)
+
         this.handleSectionsChange(updatedSections)
       } catch (err) {
         this.$nuxt.error({ statusCode: 500, message: err.message })
@@ -189,5 +214,17 @@ export default {
   right: 5px;
   color: #50a1ff !important;
   transition: 0.2s linear;
+}
+
+.newSection {
+  opacity: 0.6;
+}
+
+.newSection .card-title a::before {
+  display: none;
+}
+
+.newSection .card-title a {
+  padding-left: 0;
 }
 </style>

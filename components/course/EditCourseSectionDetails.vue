@@ -1,7 +1,7 @@
 <template>
   <b-modal
     :visible="modalShow"
-    title="Update Course Section"
+    :title="`${index === -9999 ? 'Create New' : 'Update'} Course Section`"
     @hidden="hidden"
     @ok="handleOk"
     @clear="clearFields"
@@ -37,7 +37,8 @@ export default {
   },
   computed: {
     modalShow() {
-      return this.index >= 0
+      // -9999 will create new section
+      return this.index === -9999 ? true : this.index >= 0
     }
   },
   methods: {

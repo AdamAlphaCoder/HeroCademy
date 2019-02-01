@@ -64,7 +64,6 @@ router.patch(
       const update = {}
 
       keys.forEach(key => {
-        
         if (body[key]) update[key] = body[key]
       })
 
@@ -140,7 +139,6 @@ router.put('/updateSectionsOrder', async (req, res) => {
     await Promise.all(
       sections.map((section, index) =>
         CourseSection.update(
-          
           { _id: { $in: section }, course: course._id },
           { $set: { position: index } }
         )
