@@ -4,12 +4,11 @@ const ASSET = require('./constants/ASSET')
 
 const CourseSectionAssetSchema = new Schema({
   name: { type: String, required: true },
-  description: { type: String, required: true },
-  file: { type: String, required: true },
+  description: String,
+  file: String,
   type: {
     type: String,
-    enum: ASSET.all,
-    required: true
+    enum: ASSET.all
   },
   courseSection: { type: Schema.Types.ObjectId, ref: 'CourseSection' },
   position: Number

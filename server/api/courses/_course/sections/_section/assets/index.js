@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
     // TODO: Use JOI to ensure all stuffs are filled before posting to MongoDb
 
     // TODO: Ensure that "type" is a valid type
-    const { name, description, file, type } = req.body
+    const { name } = req.body
 
     const course = await Course.findOne({
       slug: req.params.course
@@ -69,6 +69,7 @@ router.post('/', async (req, res) => {
     }
 
     const courseSection = await CourseSection.findOne({
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -81,9 +82,6 @@ router.post('/', async (req, res) => {
 
     const courseSectionAsset = new CourseSectionAsset({
       name,
-      description,
-      file,
-      type,
       courseSection: courseSection._id
     })
 

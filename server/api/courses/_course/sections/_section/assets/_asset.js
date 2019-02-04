@@ -132,12 +132,11 @@ router.delete('/', async (req, res) => {
 router.patch('/', async (req, res) => {
   try {
     const { body } = req
-    const keys = ['description', 'file', 'type']
+    const keys = ['name', 'description', 'file', 'type']
 
     const update = {}
 
     keys.forEach(key => {
-      
       if (body[key]) update[key] = body[key]
     })
 

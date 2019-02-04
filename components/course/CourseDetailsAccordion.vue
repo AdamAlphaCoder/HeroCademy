@@ -50,16 +50,30 @@
               <div
                 v-for="(asset, assetIndex) in section.assets"
                 :key="asset._id"
-                :class="`${assetsDraggableOptions.disabled ? 'assetItems' : 'assetItems draggable'}`"
+                :class="`${assetsDraggableOptions.disabled ? 'assetItems text-dark' : 'assetItems text-dark draggableAssets draggable'}`"
+                :to="`/courses/${slug}/asset/${asset._id}`"
               >
-                <a @click="editAssetDetails(sectionIndex, assetIndex)">{{ asset.name }}</a>
-                <p class="card-text">{{ asset.description }}</p>
+                <!-- <a @click="editAssetDetails(sectionIndex, assetIndex)">{{ asset.name }}</a> -->
+                <p class="card-text">{{ asset.name }}</p>
+                <small>{{ (asset.type || '').charAt(0).toUpperCase() + (asset.type || '').slice(1).toLowerCase() }}</small>
+                <a
+                  v-if="editMode"
+                  class="editLinks mr-3"
+                  @click="editAssetIndexes = [sectionIndex, assetIndex]"
+                >Edit</a>
               </div>
+              <a @click="editAssetIndexes = [sectionIndex, -9999]">
+                <div class="assetItems newElement">
+                  <span class="mr-2">
+                    <i class="fa fa-plus" aria-hidden="true"/>
+                  </span> New Asset
+                </div>
+              </a>
             </draggable>
           </b-card-body>
         </b-collapse>
       </b-card>
-      <div v-if="editMode" class="card newSection">
+      <div v-if="editMode" class="card newElement">
         <h5 class="card-title">
           <a @click="editSectionIndex = -9999">
             <span class="mr-2">
@@ -74,17 +88,24 @@
       :index="editSectionIndex"
       :handle-update="editSectionDetails"
     />
+    <edit-course-section-asset-details
+      :hidden="onEditAssetHidden"
+      :indexes="editAssetIndexes"
+      :handle-update="editAssetDetails"
+    />
   </div>
 </template>
 
 <script>
 import EditCourseSectionDetails from '~/components/course/EditCourseSectionDetails'
+import EditCourseSectionAssetDetails from '~/components/course/EditCourseSectionAssetDetails'
 // TODO: Add Update Course Sections and Assets functionality
 // TODO: When an error occurs while updating course contents, throw error on page with this.$nuxt.error()
 
 export default {
   components: {
-    EditCourseSectionDetails
+    EditCourseSectionDetails,
+    EditCourseSectionAssetDetails
   },
   props: {
     slug: {
@@ -122,7 +143,7 @@ export default {
       sectionIsDragging: false,
       assetIsDragging: false,
       editSectionIndex: -1,
-      editAssetIndex: -1
+      editAssetIndexes: [-1, -1]
     }
   },
   computed: {
@@ -135,7 +156,7 @@ export default {
     },
     assetsDraggableOptions() {
       return Object.assign(
-        { group: 'assets', draggable: '.assetItems' },
+        { group: 'assets', draggable: '.draggableAssets' },
         this.draggableOptions
       )
     },
@@ -151,7 +172,7 @@ export default {
       this.editSectionIndex = -1
     },
     onEditAssetHidden() {
-      this.editAssetIndex = -1
+      this.editAssetIndexes = [-1, -1]
     },
     updateAccordion(index) {
       this.$set(this.sectionsExpanded, index, !this.sectionsExpanded[index])
@@ -185,10 +206,42 @@ export default {
         this.$nuxt.error({ statusCode: 500, message: err.message })
       }
     },
-    editAssetDetails(sectionIndex, assetIndex) {
-      const updatedSection = Object.assign({}, this.sections[sectionIndex])
+    async editAssetDetails(sectionIndex, assetIndex, values) {
+      const keys = ['name', 'description', 'file', 'type']
+      const update = {}
+      keys.forEach(key => {
+        if (values[key]) {
+          update[key] = values[key]
+        }
+      })
 
-      updatedSection.assets[assetIndex].name = 'YOYOYO'
+      const createNewMode = assetIndex === -9999
+      // If true, create new asset instead of updating
+      const response = createNewMode
+        ? await this.$axios.post(
+            `/api/courses/${this.slug}/sections/${
+              this.sections[sectionIndex]._id
+            }/assets`,
+            update
+          )
+        : await this.$axios.patch(
+            `/api/courses/${this.slug}/sections/${
+              this.sections[sectionIndex]._id
+            }/assets/${this.sections[sectionIndex].assets[assetIndex]._id}`,
+            update
+          )
+
+      const updatedSection = Object.assign({}, this.sections[sectionIndex])
+      createNewMode
+        ? updatedSection.assets.push(response.data.courseSectionAsset)
+        : (() => {
+            updatedSection.assets[assetIndex].name =
+              response.data.courseSectionAsset.name
+            updatedSection.assets[assetIndex].type =
+              response.data.courseSectionAsset.type
+          })()
+      console.log('assets are')
+      console.log(updatedSection.assets)
       this.handleAssetsChange(updatedSection.assets, sectionIndex)
     }
   }
@@ -197,6 +250,7 @@ export default {
 
 <style>
 .assetItems {
+  position: relative;
   padding: 1rem;
   background-color: #f9fafb;
   margin-top: 1rem;
@@ -216,15 +270,15 @@ export default {
   transition: 0.2s linear;
 }
 
-.newSection {
+.newElement {
   opacity: 0.6;
 }
 
-.newSection .card-title a::before {
+.newElement .card-title a::before {
   display: none;
 }
 
-.newSection .card-title a {
+.newElement .card-title a {
   padding-left: 0;
 }
 </style>
