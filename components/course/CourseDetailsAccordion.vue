@@ -51,16 +51,32 @@
                 v-for="(asset, assetIndex) in section.assets"
                 :key="asset._id"
                 :class="`${assetsDraggableOptions.disabled ? 'assetItems text-dark' : 'assetItems text-dark draggableAssets draggable'}`"
-                :to="`/courses/${slug}/asset/${asset._id}`"
               >
-                <!-- <a @click="editAssetDetails(sectionIndex, assetIndex)">{{ asset.name }}</a> -->
-                <p class="card-text">{{ asset.name }}</p>
-                <small>{{ (asset.type || '').charAt(0).toUpperCase() + (asset.type || '').slice(1).toLowerCase() }}</small>
-                <a
-                  v-if="editMode"
-                  class="editLinks mr-3"
-                  @click="editAssetIndexes = [sectionIndex, assetIndex]"
-                >Edit</a>
+                <div class="row align-items-center">
+                  <div class="col-11">
+                    <nuxt-link
+                      v-if="!editMode"
+                      :to="`/courses/${slug}/asset/${asset._id}`"
+                      class="text-dark"
+                    >
+                      <div>
+                        <p class="card-text">{{ asset.name }}</p>
+                        <small>{{ (asset.type || '').charAt(0).toUpperCase() + (asset.type || '').slice(1).toLowerCase() }}</small>
+                      </div>
+                    </nuxt-link>
+                    <div v-else>
+                      <p class="card-text">{{ asset.name }}</p>
+                      <small>{{ (asset.type || '').charAt(0).toUpperCase() + (asset.type || '').slice(1).toLowerCase() }}</small>
+                    </div>
+                  </div>
+                  <div class="col-1">
+                    <a
+                      v-if="editMode"
+                      style="color: #50a1ff !important;"
+                      @click="editAssetIndexes = [sectionIndex, assetIndex]"
+                    >Edit</a>
+                  </div>
+                </div>
               </div>
               <a @click="editAssetIndexes = [sectionIndex, -9999]">
                 <div class="assetItems newElement">
@@ -99,8 +115,6 @@
 <script>
 import EditCourseSectionDetails from '~/components/course/EditCourseSectionDetails'
 import EditCourseSectionAssetDetails from '~/components/course/EditCourseSectionAssetDetails'
-// TODO: Add Update Course Sections and Assets functionality
-// TODO: When an error occurs while updating course contents, throw error on page with this.$nuxt.error()
 
 export default {
   components: {
@@ -207,42 +221,44 @@ export default {
       }
     },
     async editAssetDetails(sectionIndex, assetIndex, values) {
-      const keys = ['name', 'description', 'file', 'type']
-      const update = {}
-      keys.forEach(key => {
-        if (values[key]) {
-          update[key] = values[key]
-        }
-      })
+      try {
+        const keys = ['name', 'description', 'file', 'type']
+        const update = {}
+        keys.forEach(key => {
+          if (values[key]) {
+            update[key] = values[key]
+          }
+        })
 
-      const createNewMode = assetIndex === -9999
-      // If true, create new asset instead of updating
-      const response = createNewMode
-        ? await this.$axios.post(
-            `/api/courses/${this.slug}/sections/${
-              this.sections[sectionIndex]._id
-            }/assets`,
-            update
-          )
-        : await this.$axios.patch(
-            `/api/courses/${this.slug}/sections/${
-              this.sections[sectionIndex]._id
-            }/assets/${this.sections[sectionIndex].assets[assetIndex]._id}`,
-            update
-          )
+        const createNewMode = assetIndex === -9999
+        // If true, create new asset instead of updating
+        const response = createNewMode
+          ? await this.$axios.post(
+              `/api/courses/${this.slug}/sections/${
+                this.sections[sectionIndex]._id
+              }/assets`,
+              update
+            )
+          : await this.$axios.patch(
+              `/api/courses/${this.slug}/sections/${
+                this.sections[sectionIndex]._id
+              }/assets/${this.sections[sectionIndex].assets[assetIndex]._id}`,
+              update
+            )
 
-      const updatedSection = Object.assign({}, this.sections[sectionIndex])
-      createNewMode
-        ? updatedSection.assets.push(response.data.courseSectionAsset)
-        : (() => {
-            updatedSection.assets[assetIndex].name =
-              response.data.courseSectionAsset.name
-            updatedSection.assets[assetIndex].type =
-              response.data.courseSectionAsset.type
-          })()
-      console.log('assets are')
-      console.log(updatedSection.assets)
-      this.handleAssetsChange(updatedSection.assets, sectionIndex)
+        const updatedSection = Object.assign({}, this.sections[sectionIndex])
+        createNewMode
+          ? updatedSection.assets.push(response.data.courseSectionAsset)
+          : (() => {
+              updatedSection.assets[assetIndex].name =
+                response.data.courseSectionAsset.name
+              updatedSection.assets[assetIndex].type =
+                response.data.courseSectionAsset.type
+            })()
+        this.handleAssetsChange(updatedSection.assets, sectionIndex)
+      } catch (err) {
+        this.$nuxt.error({ statusCode: 500, message: err.message })
+      }
     }
   }
 }
