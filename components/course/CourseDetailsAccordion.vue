@@ -28,7 +28,10 @@
               @click="updateAccordion(sectionIndex)"
             >{{ section.name }}</a>
           </h5>
-          <a v-if="editMode" class="mr-3 editLinks" @click="editSectionIndex = sectionIndex">Edit</a>
+          <div v-if="editMode" class="editLinks mr-3">
+            <a class="mr-4 text-danger" @click="deleteSectionIndex = sectionIndex">Delete</a>
+            <a @click="editSectionIndex = sectionIndex">Edit</a>
+          </div>
         </b-card-header>
         <b-collapse
           :id="`collapse-${sectionIndex}`"
@@ -50,13 +53,13 @@
               <div
                 v-for="(asset, assetIndex) in section.assets"
                 :key="asset._id"
-                :class="`${assetsDraggableOptions.disabled ? 'assetItems text-dark' : 'assetItems text-dark draggableAssets draggable'}`"
+                :class="`assetItems text-dark${assetsDraggableOptions.disabled ? '' : ' draggableAssets draggable'}`"
               >
                 <div class="row align-items-center">
-                  <div class="col-11">
+                  <div :class="editMode ? 'col-10' : 'col-12'">
                     <nuxt-link
                       v-if="!editMode"
-                      :to="`/courses/${slug}/asset/${asset._id}`"
+                      :to="`/courses/${slug}/sections/${section._id}/assets/${asset._id}`"
                       class="text-dark"
                     >
                       <div>
@@ -69,9 +72,12 @@
                       <small>{{ (asset.type || '').charAt(0).toUpperCase() + (asset.type || '').slice(1).toLowerCase() }}</small>
                     </div>
                   </div>
-                  <div class="col-1">
+                  <div v-if="editMode" class="col-2 d-flex justify-content-around">
                     <a
-                      v-if="editMode"
+                      class="text-danger"
+                      @click="deleteAssetIndexes = [sectionIndex, assetIndex]"
+                    >Delete</a>
+                    <a
                       style="color: #50a1ff !important;"
                       @click="editAssetIndexes = [sectionIndex, assetIndex]"
                     >Edit</a>
@@ -109,17 +115,33 @@
       :indexes="editAssetIndexes"
       :handle-update="editAssetDetails"
     />
+    <delete-course-section
+      :hidden="onDeleteSectionHidden"
+      :index="deleteSectionIndex"
+      :handle-update="deleteSection"
+      :sections="sections"
+    />
+    <delete-course-section-asset
+      :hidden="onDeleteAssetHidden"
+      :indexes="deleteAssetIndexes"
+      :handle-update="deleteSectionAsset"
+      :sections="sections"
+    />
   </div>
 </template>
 
 <script>
 import EditCourseSectionDetails from '~/components/course/EditCourseSectionDetails'
 import EditCourseSectionAssetDetails from '~/components/course/EditCourseSectionAssetDetails'
+import DeleteCourseSection from '~/components/course/DeleteCourseSection'
+import DeleteCourseSectionAsset from '~/components/course/DeleteCourseSectionAsset'
 
 export default {
   components: {
     EditCourseSectionDetails,
-    EditCourseSectionAssetDetails
+    EditCourseSectionAssetDetails,
+    DeleteCourseSection,
+    DeleteCourseSectionAsset
   },
   props: {
     slug: {
@@ -157,7 +179,9 @@ export default {
       sectionIsDragging: false,
       assetIsDragging: false,
       editSectionIndex: -1,
-      editAssetIndexes: [-1, -1]
+      editAssetIndexes: [-1, -1],
+      deleteSectionIndex: -1,
+      deleteAssetIndexes: [-1, -1]
     }
   },
   computed: {
@@ -187,6 +211,12 @@ export default {
     },
     onEditAssetHidden() {
       this.editAssetIndexes = [-1, -1]
+    },
+    onDeleteSectionHidden() {
+      this.deleteSectionIndex = -1
+    },
+    onDeleteAssetHidden() {
+      this.deleteAssetIndexes = [-1, -1]
     },
     updateAccordion(index) {
       this.$set(this.sectionsExpanded, index, !this.sectionsExpanded[index])
@@ -247,6 +277,10 @@ export default {
             )
 
         const updatedSection = Object.assign({}, this.sections[sectionIndex])
+
+        // Sets assets to an array when is is undefined
+        if (!updatedSection.assets) updatedSection.assets = []
+
         createNewMode
           ? updatedSection.assets.push(response.data.courseSectionAsset)
           : (() => {
@@ -259,6 +293,27 @@ export default {
       } catch (err) {
         this.$nuxt.error({ statusCode: 500, message: err.message })
       }
+    },
+    async deleteSection(index) {
+      await this.$axios.delete(
+        `/api/courses/${this.slug}/sections/${this.sections[index]._id}`
+      )
+
+      const updatedSections = this.sections.slice(0)
+      updatedSections.splice(index, 1)
+
+      this.handleSectionsChange(updatedSections)
+    },
+    async deleteSectionAsset(sectionIndex, assetIndex) {
+      await this.$axios.patch(
+        `/api/courses/${this.slug}/sections/${
+          this.sections[sectionIndex]._id
+        }/assets/${this.sections[sectionIndex].assets[assetIndex]._id}`
+      )
+
+      const updatedSection = Object.assign({}, this.sections[sectionIndex])
+      updatedSection.assets.splice(assetIndex, 1)
+      this.handleAssetsChange(updatedSection.assets, sectionIndex)
     }
   }
 }

@@ -83,8 +83,6 @@ export default {
         body: 'Delete functionality not yet implemented!'
       })
     },
-    onNewSection() {},
-    onNewAsset() {},
     onAssetDelete() {},
     onSectionDelete() {},
     onAssetsUpdate(assets, index) {

@@ -71,7 +71,9 @@ export default {
   computed: {
     modalShow() {
       // -9999 will create new section
-      return this.indexes[1] === -9999 ? true : this.indexes[1] >= 0
+      return this.indexes[0] >= 0 && this.indexes[1] === -9999
+        ? true
+        : this.indexes[0] >= 0 && this.indexes[1] >= 0
     }
   },
   methods: {

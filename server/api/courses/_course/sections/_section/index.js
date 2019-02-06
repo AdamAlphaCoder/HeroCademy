@@ -5,6 +5,7 @@ const assets = require('./assets')
 
 const Course = require('../../../../../models/Course')
 const CourseSection = require('../../../../../models/CourseSection')
+const CourseSectionAsset = require('../../../../../models/CourseSectionAsset')
 
 // Gets a single course section
 router.get('/', async (req, res) => {
@@ -65,9 +66,6 @@ router.delete('/', async (req, res) => {
       })
     }
 
-    // TODO: Update the positions of all the other sections
-    // Updating of sections should be ACID
-
     const courseSection = await CourseSection.findOneAndDelete({
       _id: req.params.section,
       course: course._id
@@ -86,6 +84,10 @@ router.delete('/', async (req, res) => {
           )
         )
       )
+
+      await CourseSectionAsset.deleteMany({
+        courseSection: courseSection._id
+      })
     }
 
     res.json({
