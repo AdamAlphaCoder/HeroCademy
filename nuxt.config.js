@@ -24,14 +24,15 @@ module.exports = {
   /*
   ** Global CSS
   */
-  css: ['~/assets/scss/page.scss'],
+  css: ['~/assets/scss/page.scss', 'video.js/dist/video-js.css'],
 
   /*
   ** Plugins to load before mounting the App
   */
   plugins: [
     { src: '~/plugins/vue-moment.js' },
-    { src: '~/plugins/vuedraggable.js' }
+    { src: '~/plugins/vuedraggable.js' },
+    { src: '~/plugins/vue-video-player.js', ssr: false }
   ],
 
   /*
