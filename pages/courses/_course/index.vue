@@ -12,7 +12,7 @@
       block
       @click="editCourse"
     >{{ editMode ? 'Stop Editing' : 'Edit' }} Course Content</b-button>
-    <b-button class="mt-3" variant="danger" size="lg" block @click="deleteCourse">Delete</b-button>
+    <b-button v-b-modal.deleteModal class="mt-3" variant="danger" size="lg" block>Delete</b-button>
     <edit-course-details :course="course" :modal-show="modalShow" :hidden="onModalHidden"/>
 
     <course-details-accordion
@@ -24,6 +24,8 @@
       :handle-assets-change="onAssetsUpdate"
       :get-component-data="getComponentData"
     />
+
+    <b-modal id="deleteModal" @ok="deleteCourse">Delete course "{{ course.name }}"?</b-modal>
   </div>
 </template>
 
@@ -77,14 +79,19 @@ export default {
     editCourse() {
       this.editMode = !this.editMode
     },
-    deleteCourse() {
-      this.$store.dispatch('updateMessage', {
-        variant: 'warning',
-        body: 'Delete functionality not yet implemented!'
-      })
+    async deleteCourse() {
+      try {
+        const response = await this.$axios.delete(
+          `/api/courses/${this.course.slug}`
+        )
+
+        if (!response.data.success) throw new Error(response.data.message)
+
+        this.$router.push('/courses')
+      } catch (err) {
+        this.$nuxt.error({ statusCode: 500, message: err.message })
+      }
     },
-    onAssetDelete() {},
-    onSectionDelete() {},
     onAssetsUpdate(assets, index) {
       this.$set(this.course.sections[index], 'assets', assets)
     },

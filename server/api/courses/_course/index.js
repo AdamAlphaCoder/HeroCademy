@@ -99,6 +99,25 @@ router.delete('/', async (req, res) => {
       slug: req.params.course
     })
 
+    if (!course) {
+      return res.json({
+        success: false,
+        course: null
+      })
+    }
+
+    const courseSections = await CourseSection.find({
+      course: course._id
+    }).lean()
+
+    await CourseSectionAsset.deleteMany({
+      courseSection: { $in: courseSections.map(section => section._id) }
+    }).lean()
+
+    await CourseSection.deleteMany({
+      _id: { $in: courseSections.map(section => section._id) }
+    })
+
     res.json({
       success: !!course,
       course
