@@ -84,7 +84,7 @@
                   </div>
                 </div>
               </div>
-              <a @click="editAssetIndexes = [sectionIndex, -9999]">
+              <a v-if="editMode" @click="editAssetIndexes = [sectionIndex, -9999]">
                 <div class="assetItems newElement">
                   <span class="mr-2">
                     <i class="fa fa-plus" aria-hidden="true"/>

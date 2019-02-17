@@ -46,9 +46,15 @@ router.get('/', async (req, res) => {
       _id: req.params.asset
     }).lean()
 
+    const assetsInSection = await CourseSectionAsset.find({
+      courseSection: courseSection._id
+    })
+
     res.json({
       success: !!courseSectionAsset,
-      courseSectionAsset
+      courseSection,
+      courseSectionAsset,
+      assetsInSection
     })
   } catch (err) {
     res.status(500).json({

@@ -1,19 +1,37 @@
 <template>
   <div class="container mt-4">
-    <video-player
-      v-if="courseSectionAsset.file && courseSectionAsset.type === 'VIDEO'"
-      :source="courseSectionAsset.file"
-    />
-    <b-button
-      v-if="courseSectionAsset.file && courseSectionAsset.type === 'DOWNLOADABLE'"
-      :href="courseSectionAsset.file"
-      target="_blank"
-      variant="success"
-      block
-      size="lg"
-    >Download</b-button>
-    <h3 class="mt-3">{{ courseSectionAsset.name }}</h3>
-    <p>Type: {{ (courseSectionAsset.type || '').charAt(0).toUpperCase() + (courseSectionAsset.type || '').slice(1).toLowerCase() }}</p>
+    <div class="row">
+      <div class="col-md-8 p-md-3">
+        <video-player
+          v-if="courseSectionAsset.file && courseSectionAsset.type === 'VIDEO'"
+          :source="courseSectionAsset.file"
+        />
+        <b-button
+          v-if="courseSectionAsset.file && courseSectionAsset.type === 'DOWNLOADABLE'"
+          :href="courseSectionAsset.file"
+          target="_blank"
+          variant="success"
+          block
+          size="lg"
+        >Download</b-button>
+        <h3 class="mt-3">{{ courseSectionAsset.name }}</h3>
+        <p>Type: {{ (courseSectionAsset.type || '').charAt(0).toUpperCase() + (courseSectionAsset.type || '').slice(1).toLowerCase() }}</p>
+      </div>
+      <div class="col-md-4 p-md-3">
+        <div id="suggestionsContainer">
+          <b-list-group>
+            <b-list-group-item
+              disabled
+            >Section {{ courseSection.position + 1 }}: {{ courseSection.name }}</b-list-group-item>
+            <b-list-group-item
+              v-for="asset in assetsInSection"
+              :key="asset._id"
+              :to="`/courses/${courseSlug}/sections/${sectionId}/assets/${asset._id}`"
+            >{{ asset.name }}</b-list-group-item>
+          </b-list-group>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -29,7 +47,7 @@ export default {
   async asyncData(context) {
     try {
       const {
-        data: { courseSectionAsset }
+        data: { courseSection, courseSectionAsset, assetsInSection }
       } = await context.$axios.get(
         `/api/courses/${context.params.course}/sections/${
           context.params.section
@@ -37,11 +55,15 @@ export default {
       )
 
       if (!courseSectionAsset) {
-        context.error({ statusCode: 404, message: 'Page not found' })
+        return context.error({ statusCode: 404, message: 'Page not found' })
       }
 
       return {
-        courseSectionAsset
+        courseSlug: context.params.course,
+        courseSectionAsset,
+        courseSection,
+        assetsInSection,
+        sectionId: context.params.section
       }
     } catch (err) {
       context.error(err)
@@ -49,3 +71,10 @@ export default {
   }
 }
 </script>
+
+<style>
+#suggestionsContainer > .list-group {
+  max-height: 350px;
+  overflow-y: scroll;
+}
+</style>
