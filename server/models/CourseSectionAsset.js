@@ -1,20 +1,33 @@
 const { model, Schema } = require('mongoose')
-const URLSlugs = require('mongoose-url-slugs')
 
 const ASSET = require('./constants/ASSET')
 
 const CourseSectionAssetSchema = new Schema({
   name: { type: String, required: true },
-  description: { type: String, required: true },
-  file: { type: String, required: true },
+  description: String,
+  file: String,
   type: {
     type: String,
-    enum: ASSET.all,
-    required: true
+    enum: ASSET.all
   },
-  courseSection: { type: Schema.Types.ObjectId, ref: 'CourseSection' }
+  courseSection: { type: Schema.Types.ObjectId, ref: 'CourseSection' },
+  position: Number
 })
 
-CourseSectionAssetSchema.plugin(URLSlugs('name', { alwaysRecreate: true }))
+CourseSectionAssetSchema.pre('save', function(next) {
+  // Only increment when the document is new and position doesn't exist
+  if (this.isNew && !this.position) {
+    CourseSectionAsset.count({ courseSection: this.courseSection }).then(
+      res => {
+        this.position = res // Increment count
+        next()
+      }
+    )
+  } else {
+    next()
+  }
+})
 
-module.exports = model('CourseSectionAsset', CourseSectionAssetSchema)
+const CourseSectionAsset = model('CourseSectionAsset', CourseSectionAssetSchema)
+
+module.exports = CourseSectionAsset

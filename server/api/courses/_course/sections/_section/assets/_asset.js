@@ -1,4 +1,5 @@
 const router = require('express').Router({ mergeParams: true })
+const mongoose = require('mongoose')
 
 const Course = require('../../../../../../models/Course')
 const CourseSection = require('../../../../../../models/CourseSection')
@@ -18,8 +19,18 @@ router.get('/', async (req, res) => {
       })
     }
 
+    if (
+      !mongoose.Types.ObjectId.isValid(req.params.section) ||
+      !mongoose.Types.ObjectId.isValid(req.params.asset)
+    ) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -32,12 +43,18 @@ router.get('/', async (req, res) => {
 
     const courseSectionAsset = await CourseSectionAsset.findOne({
       courseSection: courseSection._id,
-      slug: req.params.asset
+      _id: req.params.asset
     }).lean()
+
+    const assetsInSection = await CourseSectionAsset.find({
+      courseSection: courseSection._id
+    })
 
     res.json({
       success: !!courseSectionAsset,
-      courseSectionAsset
+      courseSection,
+      courseSectionAsset,
+      assetsInSection
     })
   } catch (err) {
     res.status(500).json({
@@ -61,8 +78,18 @@ router.delete('/', async (req, res) => {
       })
     }
 
+    if (
+      !mongoose.Types.ObjectId.isValid(req.params.section) ||
+      !mongoose.Types.ObjectId.isValid(req.params.asset)
+    ) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -75,8 +102,25 @@ router.delete('/', async (req, res) => {
 
     const courseSectionAsset = await CourseSectionAsset.findOneAndDelete({
       courseSection: courseSection._id,
-      slug: req.params.asset
+      _id: req.params.asset
     }).lean()
+
+    if (courseSectionAsset) {
+      const allAssets = await CourseSectionAsset.find({
+        courseSection: courseSection._id
+      })
+        .sort({ position: 1 })
+        .lean()
+
+      await Promise.all(
+        allAssets.map((asset, index) =>
+          CourseSectionAsset.update(
+            { _id: asset._id },
+            { $set: { position: index } }
+          )
+        )
+      )
+    }
 
     res.json({
       success: !!courseSectionAsset,
@@ -94,12 +138,11 @@ router.delete('/', async (req, res) => {
 router.patch('/', async (req, res) => {
   try {
     const { body } = req
-    const keys = ['description', 'file', 'type']
+    const keys = ['name', 'description', 'file', 'type']
 
     const update = {}
 
     keys.forEach(key => {
-      // eslint-disable-next-line
       if (body[key]) update[key] = body[key]
     })
 
@@ -114,8 +157,18 @@ router.patch('/', async (req, res) => {
       })
     }
 
+    if (
+      !mongoose.Types.ObjectId.isValid(req.params.section) ||
+      !mongoose.Types.ObjectId.isValid(req.params.asset)
+    ) {
+      return res.json({
+        success: false,
+        courseSectionAsset: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -129,7 +182,7 @@ router.patch('/', async (req, res) => {
     const courseSectionAsset = await CourseSectionAsset.findOneAndUpdate(
       {
         courseSection: courseSection._id,
-        slug: req.params.asset
+        _id: req.params.asset
       },
       update,
       { new: true }

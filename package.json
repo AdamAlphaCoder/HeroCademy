@@ -16,9 +16,10 @@
     "@nuxtjs/axios": "^5.0.0",
     "@nuxtjs/google-analytics": "^2.0.2",
     "algoliasearch": "^3.32.0",
+    "aws-sdk": "^2.390.0",
     "bcrypt": "^3.0.3",
     "body-parser": "^1.18.3",
-    "bootstrap": "^4.1.3",
+    "bootstrap": "4.1.3",
     "bootstrap-vue": "^2.0.0-beta",
     "braintree": "^2.14.0",
     "cookie-parser": "^1.4.3",
@@ -26,11 +27,15 @@
     "dotenv": "^6.2.0",
     "express": "^4.16.3",
     "express-session": "^1.15.6",
+    "font-awesome": "^4.7.0",
     "helmet": "^3.15.0",
     "joi": "^14.3.1",
     "jsonwebtoken": "^8.4.0",
+    "lodash": "^4.17.11",
     "mongoose": "^5.4.2",
     "mongoose-url-slugs": "^1.0.2",
+    "multer": "^1.4.1",
+    "multer-s3": "^2.9.0",
     "nuxt": "^2.0.0",
     "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",
@@ -40,6 +45,9 @@
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",
     "vue-instantsearch": "^1.7.0",
+    "vue-moment": "^4.0.0",
+    "vue-video-player": "^5.0.2",
+    "vuedraggable": "^2.17.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
@@ -50,7 +58,9 @@
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-vue": "^4.0.0",
+    "node-sass": "^4.11.0",
     "nodemon": "^1.11.0",
-    "prettier": "1.14.3"
+    "prettier": "1.14.3",
+    "sass-loader": "^7.1.0"
   }
 }

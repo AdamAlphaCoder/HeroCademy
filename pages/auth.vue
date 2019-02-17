@@ -1,6 +1,6 @@
 <template>
-  <div id="login" :style="loginStyle">
-    <div class="container pt-5 d-flex justify-content-center">
+  <div class="layout-centered">
+    <div id="login" :style="loginStyle" class="main-content">
       <login-form/>
     </div>
   </div>
@@ -12,13 +12,14 @@ import img from '~/assets/img/bg/4.jpg'
 
 export default {
   layout: 'nonavbarfooter',
+  middleware: 'noAuth',
   components: {
     LoginForm
   },
   data() {
     return {
       loginStyle: {
-        height: '100vh',
+        minHeight: '100vh',
         backgroundImage: `url(${img})`,
         backgroundPosition: 'center',
         backgroundSize: 'cover',

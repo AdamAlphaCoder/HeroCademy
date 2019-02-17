@@ -12,8 +12,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:vue/recommended',
-    'plugin:prettier/recommended',
-    'plugin:security/recommended'
+    'plugin:prettier/recommended'
   ],
   // required to lint *.vue files
   plugins: ['vue', 'prettier', 'security'],
@@ -21,6 +20,7 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'vue/max-attributes-per-line': 'off'
+    'vue/max-attributes-per-line': 'off',
+    'no-unused-vars': 'off'
   }
 }

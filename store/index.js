@@ -1,10 +1,14 @@
 export const state = () => ({
-  authUser: null
+  authUser: null,
+  message: null
 })
 
 export const mutations = {
   SET_USER: function(state, user) {
     state.authUser = user
+  },
+  SET_MESSAGE: function(state, message) {
+    state.message = message
   }
 }
 
@@ -66,5 +70,9 @@ export const actions = {
     } catch (error) {
       throw new Error('Wrong password')
     }
+  },
+  updateMessage({ commit }, message) {
+    // Contains body and variant
+    commit('SET_MESSAGE', message)
   }
 }

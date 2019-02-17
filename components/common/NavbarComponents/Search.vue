@@ -1,14 +1,14 @@
 <template>
-  <b-navbar-nav class="ml-4 ml-md-auto">
-    <b-nav-form @submit.prevent="searchSubmit">
-      <b-form-input
-        id="searchBox"
-        v-model="searchTerm"
-        placeholder="Search here..."
-        size="md"
-        class="mr-sm-2"
-        type="text"
-      />
+  <b-navbar-nav class="ml-4 ml-md-auto py-2">
+    <b-nav-form id="searchBox" class="mr-sm-2" @submit.prevent="searchSubmit">
+      <b-input-group>
+        <b-form-input v-model="searchTerm" placeholder="Search here..." size="md" type="text"/>
+        <b-input-group-append>
+          <b-btn variant="warning">
+            <i class="fa fa-search" aria-hidden="true"/>
+          </b-btn>
+        </b-input-group-append>
+      </b-input-group>
     </b-nav-form>
   </b-navbar-nav>
 </template>
@@ -32,5 +32,9 @@ export default {
 #searchBox {
   width: 400px;
   max-width: 100%;
+}
+
+#searchBox > .input-group {
+  width: 100%;
 }
 </style>

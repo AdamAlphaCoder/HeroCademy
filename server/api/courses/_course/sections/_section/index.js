@@ -1,9 +1,11 @@
 const router = require('express').Router({ mergeParams: true })
+const mongoose = require('mongoose')
 
 const assets = require('./assets')
 
 const Course = require('../../../../../models/Course')
 const CourseSection = require('../../../../../models/CourseSection')
+const CourseSectionAsset = require('../../../../../models/CourseSectionAsset')
 
 // Gets a single course section
 router.get('/', async (req, res) => {
@@ -19,8 +21,15 @@ router.get('/', async (req, res) => {
       })
     }
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.section)) {
+      return res.json({
+        success: false,
+        courseSection: null
+      })
+    }
+
     const courseSection = await CourseSection.findOne({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
 
@@ -50,10 +59,36 @@ router.delete('/', async (req, res) => {
       })
     }
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.section)) {
+      return res.json({
+        success: false,
+        courseSection: null
+      })
+    }
+
     const courseSection = await CourseSection.findOneAndDelete({
-      slug: req.params.section,
+      _id: req.params.section,
       course: course._id
     }).lean()
+
+    if (courseSection) {
+      const allSections = await CourseSection.find({})
+        .sort({ position: 1 })
+        .lean()
+
+      await Promise.all(
+        allSections.map((section, index) =>
+          CourseSection.update(
+            { _id: section._id },
+            { $set: { position: index } }
+          )
+        )
+      )
+
+      await CourseSectionAsset.deleteMany({
+        courseSection: courseSection._id
+      })
+    }
 
     res.json({
       success: !!courseSection,
@@ -71,12 +106,12 @@ router.delete('/', async (req, res) => {
 router.patch('/', async (req, res) => {
   try {
     const { body } = req
-    const keys = []
+    // TODO: Update keys inside here
+    const keys = ['name']
 
     const update = {}
 
     keys.forEach(key => {
-      // eslint-disable-next-line
       if (body[key]) update[key] = body[key]
     })
 
@@ -91,9 +126,16 @@ router.patch('/', async (req, res) => {
       })
     }
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.section)) {
+      return res.json({
+        success: false,
+        courseSection: null
+      })
+    }
+
     const courseSection = await CourseSection.findOneAndUpdate(
       {
-        slug: req.params.section,
+        _id: req.params.section,
         course: course._id
       },
       update,

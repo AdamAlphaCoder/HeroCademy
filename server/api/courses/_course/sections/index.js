@@ -21,7 +21,9 @@ router.get('/', async (req, res) => {
 
     const courseSections = await CourseSection.find({
       course: course._id
-    }).lean()
+    })
+      .sort({ position: 1 })
+      .lean()
 
     return res.json({
       success: !!courseSections.length,

@@ -8,12 +8,12 @@
 
     <b-collapse id="nav_collapse" is-nav>
       <b-navbar-nav class="ml-4">
-        <b-nav-item to="/auth" exact>Test</b-nav-item>
+        <b-nav-item to="/courses" exact>Courses</b-nav-item>
       </b-navbar-nav>
 
       <search/>
 
-      <b-navbar-nav class="ml-4 ml-md-auto">
+      <b-navbar-nav class="ml-4 ml-md-auto py-2">
         <user-dropdown/>
       </b-navbar-nav>
     </b-collapse>
@@ -33,7 +33,7 @@ export default {
 </script>
 
 <style>
-#nav_collapse {
+/* #nav_collapse {
   height: 52px;
-}
+} */
 </style>
