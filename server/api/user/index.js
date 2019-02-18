@@ -1,1 +1,7 @@
-// TODO: Add User Profile information, along with ways to update user's profile
+const router = require('express').Router()
+
+const _id = require('./_id')
+
+router.use('/:id', _id)
+
+module.exports = router

@@ -10,7 +10,7 @@
             alt="profile"
           >
         </template>
-        <b-dropdown-item to="/my-profile">
+        <b-dropdown-item to="/me">
           <div>
             <p class="mb-0">{{ $store.state.authUser.name }}</p>
             <small class="text-muted">{{ $store.state.authUser.email }}</small>
